@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>নতুন করদাতা নিবন্ধন | কর অঞ্চল-নোয়াখালী</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- হেডার -->
+    <header class="bg-emerald-800 text-white shadow-md border-b-4 border-amber-500">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg"
+                     alt="লগো" class="w-10 h-10 bg-white rounded-full p-1 shadow">
+                <div>
+                    <h1 class="text-lg font-bold leading-none">কর অঞ্চল-নোয়াখালী</h1>
+                    <p class="text-[11px] text-emerald-200 mt-0.5">নতুন করদাতা অন্তর্ভুক্তি ফরম</p>
+                </div>
+            </div>
+            <a href="{% url 'dashboard' %}" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg border border-emerald-600 transition">
+                ← ড্যাশবোর্ডে ফিরুন
+            </a>
+        </div>
+    </header>
+
+    <!-- ফর্ম সেকশন -->
+    <main class="flex-grow max-w-3xl w-full mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">করদাতার প্রাথমিক তথ্য এন্ট্রি</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">নতুন করদাতার পরিচিতি ও ৩-লাইনের ডাক ঠিকানা সংরক্ষণ করুন</p>
+                </div>
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-1 rounded-full">ফরম-১</span>
+            </div>
+
+            {% if messages %}
+                <div class="p-4">
+                    {% for message in messages %}
+                        <div class="p-3 text-xs rounded-lg {% if message.tags == 'error' %}bg-rose-50 text-rose-700 border border-rose-200{% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'add_taxpayer' %}" class="p-6 space-y-5">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                            টিআইএন নম্বর (TIN / ID) <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="tin" required placeholder="১২ ডিজিটের ই-টিআইএন নম্বর"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                            কর সার্কেল / ওয়ার্ড / হোল্ডিং <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="circle" required placeholder="যেমন: সার্কেল-১৩ (নোয়াখালী)"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">
+                        করদাতার নাম / প্রতিষ্ঠানের নাম <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" name="name" required placeholder="জাতীয় পরিচয়পত্র বা নিবন্ধন সনদ অনুযায়ী"
+                           class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                            মোবাইল নম্বর (যোগাযোগের জন্য)
+                        </label>
+                        <input type="text" name="phone" placeholder="০১৭XXXXXXXX"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                            ইমেইল অ্যাড্রেস (ঐচ্ছিক)
+                        </label>
+                        <input type="email" name="email" placeholder="taxpayer@example.com"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- ৩-লাইনের ডাক ও প্রাতিষ্ঠানিক ঠিকানা সেকশন -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">করদাতার পূর্ণাঙ্গ ডাক ও অফিস ঠিকানা (৩ লাইন)</h3>
+
+                    <!-- লাইন ১: বাড়ি / রোড / হোল্ডিং -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">
+                            ১ম লাইন: বাড়ি / ফ্ল্যাট / রোড / হোল্ডিং / গ্রাম <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="address_line1" required placeholder="যেমন: বাড়ি নং-১২, রোড নং-০৪, হাউজিং এস্টেট"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white">
+                    </div>
+
+                    <!-- লাইন ২: ডাকঘর ও পোস্ট কোড -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">
+                            ২য় লাইন: ডাকঘর ও পোস্ট কোড (Post Office & Postal Code) <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="address_line2" required placeholder="যেমন: ডাকঘর: মাইজদী প্রধান ডাকঘর - ৩৮০০"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white">
+                    </div>
+
+                    <!-- লাইন ৩: উপজেলা ও জেলা -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">
+                            ৩য় লাইন: উপজেলা ও জেলা (Upazilla & District) <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="address_line3" required placeholder="যেমন: উপজেলা: সদর, জেলা: নোয়াখালী"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white">
+                    </div>
+                </div>
+
+                <!-- বাটন সেকশন -->
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+                    <a href="{% url 'dashboard' %}" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">
+                        বাতিল করুন
+                    </a>
+                    <button type="submit" class="px-5 py-2 text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg shadow-sm transition">
+                        সংরক্ষণ করুন (Save Taxpayer)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- ফুটার -->
+    <footer class="bg-slate-100 border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        <p>© 2026 কর অঞ্চল-নোয়াখালী | জাতীয় রাজস্ব বোর্ড</p>
+    </footer>
+
+</body>
+</html>

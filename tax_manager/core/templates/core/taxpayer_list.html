@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>করদাতা অনুসন্ধান ও তালিকা | কর অঞ্চল-নোয়াখালী</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Hind Siliguri', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- হেডার -->
+    <header class="bg-emerald-800 text-white shadow-md border-b-4 border-amber-500">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg"
+                     alt="লগো" class="w-10 h-10 bg-white rounded-full p-1 shadow">
+                <div>
+                    <h1 class="text-lg font-bold leading-none">কর অঞ্চল-নোয়াখালী</h1>
+                    <p class="text-[11px] text-emerald-200 mt-0.5">করদাতা অনুসন্ধান ও ডাটাবেজ ডিরেক্টরি</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'add_taxpayer' %}" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-3 py-1.5 rounded-lg shadow transition">
+                    + নতুন করদাতা
+                </a>
+                <a href="{% url 'dashboard' %}" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg border border-emerald-600 transition">
+                    ← ড্যাশবোর্ড
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- মূল বডি -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-3 text-xs rounded-lg {% if message.tags == 'error' %}bg-rose-50 text-rose-700 border border-rose-200{% else %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- সার্চ ও ফিল্টারিং কার্ড -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <form method="GET" action="{% url 'taxpayer_list' %}" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                <div class="sm:col-span-6">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">টিআইএন, নাম, মোবাইল বা ঠিকানা দিয়ে খুঁজুন</label>
+                    <input type="text" name="q" value="{{ query }}" placeholder="যেমন: ১২ ডিজিটের TIN, নাম বা ফোন নম্বর..."
+                           class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+
+                <div class="sm:col-span-4">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">সার্কেল অনুযায়ী ফিল্টার</label>
+                    <select name="circle" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <option value="">-- সকল সার্কেল --</option>
+                        {% for c in circles %}
+                            <option value="{{ c }}" {% if circle_filter == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="sm:col-span-2 flex space-x-2">
+                    <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2 px-3 text-sm rounded-lg transition shadow">
+                        🔍 সার্চ
+                    </button>
+                    {% if query or circle_filter %}
+                        <a href="{% url 'taxpayer_list' %}" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 text-sm rounded-lg transition">
+                            রিসেট
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- ফলাফল ও তালিকা টেবিল -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/75">
+                <h3 class="font-bold text-slate-800 text-sm">
+                    করদাতা তালিকা
+                    <span class="ml-2 text-xs font-normal text-slate-500">(মোট পাওয়া গেছে: {{ total_found }} জন)</span>
+                </h3>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                        <tr>
+                            <th class="p-3">TIN / আইডি</th>
+                            <th class="p-3">করদাতার নাম ও যোগাযোগ</th>
+                            <th class="p-3">সার্কেল</th>
+                            <th class="p-3">পূর্ণাঙ্গ ঠিকানা (৩ লাইন)</th>
+                            <th class="p-3 text-center">স্ট্যাটাস</th>
+                            <th class="p-3 text-center">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for taxpayer in taxpayers %}
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 font-mono font-bold text-emerald-800">{{ taxpayer.tin }}</td>
+                            <td class="p-3">
+                                <div class="font-bold text-slate-800 text-sm">{{ taxpayer.name }}</div>
+                                <div class="text-[11px] text-slate-500">ফোন: {{ taxpayer.phone|default:"-" }}</div>
+                                {% if taxpayer.email %}<div class="text-[10px] text-slate-400">{{ taxpayer.email }}</div>{% endif %}
+                            </td>
+                            <td class="p-3 font-medium text-slate-700">
+                                <span class="bg-slate-100 px-2 py-0.5 rounded text-[11px]">{{ taxpayer.holding_or_circle }}</span>
+                            </td>
+                            <td class="p-3 text-[11px] leading-tight text-slate-600 max-w-xs">
+                                <div><strong class="text-slate-700">বাড়ি/রোড:</strong> {{ taxpayer.address_line1|default:"-" }}</div>
+                                <div><strong class="text-slate-700">ডাকঘর:</strong> {{ taxpayer.address_line2|default:"-" }}</div>
+                                <div><strong class="text-slate-700">উপজেলা/জেলা:</strong> {{ taxpayer.address_line3|default:"-" }}</div>
+                            </td>
+                            <td class="p-3 text-center">
+                                {% if taxpayer.is_active %}
+                                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-medium text-[10px]">সক্রিয়</span>
+                                {% else %}
+                                    <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-medium text-[10px]">নিষ্ক্রিয়</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-3 text-center">
+                                <a href="{% url 'edit_taxpayer' taxpayer.id %}"
+                                   class="inline-flex items-center px-3 py-1 bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold rounded-md shadow-sm transition text-xs">
+                                    ✏️ আপডেট / এডিট
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-slate-400">
+                                আপনার অনুসন্ধানের সাথে মিলে এমন কোনো করদাতা পাওয়া যায়নি।
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ফুটার -->
+    <footer class="bg-slate-100 border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        <p>© 2026 কর অঞ্চল-নোয়াখালী | জাতীয় রাজস্ব বোর্ড</p>
+    </footer>
+
+</body>
+</html>

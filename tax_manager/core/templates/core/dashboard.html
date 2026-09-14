@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কর অঞ্চল-নোয়াখালী | ড্যাশবোর্ড</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- হেডার বার -->
+    <header class="bg-emerald-800 text-white shadow-md border-b-4 border-amber-500 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- লগো ও নাম -->
+                <div class="flex items-center space-x-3">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg"
+                         alt="লগো" class="w-10 h-10 bg-white rounded-full p-1 shadow">
+                    <div>
+                        <h1 class="text-lg font-bold leading-none">কর অঞ্চল-নোয়াখালী</h1>
+                        <p class="text-[11px] text-emerald-200 mt-0.5">ডিজিটাল ট্যাক্স ম্যানেজমেন্ট প্ল্যাটফর্ম</p>
+                    </div>
+                </div>
+
+                <!-- ইউজার ইনফো ও লগআউট -->
+                <div class="flex items-center space-x-3">
+                    <span class="text-xs bg-emerald-900/80 px-3 py-1.5 rounded-md border border-emerald-700 text-emerald-100 hidden sm:inline">
+                        কর্মকর্তা: <strong>{{ request.user.username }}</strong>
+                    </span>
+                    <a href="{% url 'logout' %}" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1.5 rounded-md font-medium transition shadow-sm">
+                        লগআউট
+                    </a>
+                </div>
+            </div>
+
+            <!-- মেনুবার / নেভিগেশন লিংকস -->
+            <div class="flex space-x-1 sm:space-x-4 border-t border-emerald-700/60 py-2 overflow-x-auto text-xs sm:text-sm font-medium">
+                <a href="{% url 'dashboard' %}" class="px-3 py-1 rounded-md bg-emerald-900 text-amber-300">হোম / সারসংক্ষেপ</a>
+                <a href="{% url 'add_taxpayer' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">+ করদাতা যুক্ত</a>
+                <a href="{% url 'taxpayer_list' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">করদাতা অনুসন্ধান ও তালিকা</a>
+                <a href="{% url 'add_collection' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">+ কর আদায় (Collection)</a>
+                <a href="{% url 'view_collections' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">আদায় বিবরণী (View Collection)</a>
+                <a href="{% url 'advance_register' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">অগ্রিম কর রেজিস্টার</a>
+                <a href="{% url 'arrear_register' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">বকেয়া কর রেজিস্টার</a>
+                <a href="{% url 'notice_section' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">নোটিশ শাখা</a>
+                <a href="/admin/" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-200 ml-auto">মাস্টার অ্যাডমিন ↗</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- মূল কনটেন্ট এরিয়া -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-3 text-sm rounded-lg border bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center justify-between">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- মূল কর্মপদ্ধতি অ্যাকশন গ্রিড (৫টি প্রধান অপশন) -->
+        <div>
+            <h2 class="text-base font-bold text-slate-700 mb-3">প্রধান কার্যক্রম ও রেজিস্টারসমূহ</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+
+                <!-- ১. নতুন করদাতা যুক্ত -->
+                <a href="{% url 'add_taxpayer' %}" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition flex flex-col items-center text-center group">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-full flex items-center justify-center text-2xl font-bold group-hover:scale-105 transition">
+                        👤+
+                    </div>
+                    <span class="mt-3 text-sm font-bold text-slate-800">নতুন করদাতা</span>
+                    <span class="text-[11px] text-slate-500 mt-0.5">TIN ও প্রোফাইল এন্ট্রি</span>
+                </a>
+
+                <!-- ২. কর আদায় / কালেকশন -->
+                <a href="{% url 'add_collection' %}" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition flex flex-col items-center text-center group">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-full flex items-center justify-center text-2xl font-bold group-hover:scale-105 transition">
+                        ৳+
+                    </div>
+                    <span class="mt-3 text-sm font-bold text-slate-800">কর আদায় (Collection)</span>
+                    <span class="text-[11px] text-slate-500 mt-0.5">রসিদ ও চালান অন্তর্ভুক্তি</span>
+                </a>
+
+                <!-- ৩. অগ্রিম কর রেজিস্টার -->
+                <a href="{% url 'advance_register' %}" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition flex flex-col items-center text-center group">
+                    <div class="w-12 h-12 bg-teal-50 text-teal-700 rounded-full flex items-center justify-center text-2xl font-bold group-hover:scale-105 transition">
+                        📘
+                    </div>
+                    <span class="mt-3 text-sm font-bold text-slate-800">অগ্রিম কর রেজিস্টার</span>
+                    <span class="text-[11px] text-slate-500 mt-0.5">Advance Tax Ledger</span>
+                </a>
+
+                <!-- ৪. বকেয়া কর
+                <a href="{% url 'arrear_register' %}" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-rose-500 hover:shadow-md transition flex flex-col items-center text-center group">
+                    <div class="w-12 h-12 bg-rose-50 text-rose-700 rounded-full flex items-center justify-center text-2xl font-bold group-hover:scale-105 transition">
+                        📕
+                    </div>
+                    <span class="mt-3 text-sm font-bold text-slate-800">বকেয়া কর রেজিস্টার</span>
+                    <span class="text-[11px] text-slate-500 mt-0.5">Arrear Tax Ledger</span>
+                </a>
+                 রেজিস্টার -->
+
+                <div class="bg-white p-5 rounded-xl border-l-4 border-l-rose-500 border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="text-slate-500 text-xs font-semibold">মোট সংগৃহীত বকেয়া কর</div>
+                    <div class="mt-2 flex items-baseline justify-between">
+                        <span class="text-2xl font-bold text-rose-600">৳ {{ total_arrear_collected|floatformat:2 }}</span>
+                        <a href="{% url 'arrear_list' %}" class="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline bg-rose-50 border border-rose-200 px-2 py-1 rounded-md transition">
+                            সময়কাল অনুযায়ী তালিকা →
+                        </a>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-2">দাবি আদায় খাতা হতে</p>
+            </div>
+
+                <!-- ৫. নোটিশ শাখা -->
+                <a href="{% url 'notice_section' %}" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-amber-500 hover:shadow-md transition flex flex-col items-center text-center group">
+                    <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-full flex items-center justify-center text-2xl font-bold group-hover:scale-105 transition">
+                        📢
+                    </div>
+                    <span class="mt-3 text-sm font-bold text-slate-800">নোটিশ সেকশন</span>
+                    <span class="text-[11px] text-slate-500 mt-0.5">ডিমান্ড ও রিমাইন্ডার জারি</span>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- মেট্রিক সামারি কার্ডসমূহ -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <div class="text-slate-500 text-xs font-semibold">নিবন্ধিত সক্রিয় করদাতা</div>
+            <div class="mt-2 flex items-baseline justify-between">
+              <span class="text-3xl font-bold text-slate-800">{{ total_taxpayers }}</span>
+              <a href="{% url 'taxpayer_list' %}" class="text-xs text-emerald-700 hover:underline font-medium">তালিকা ও অনুসন্ধান →</a>
+            </div>
+          </div>
+
+            <div class="bg-white p-5 rounded-xl border-l-4 border-l-teal-500 border-slate-200 shadow-sm">
+                <div class="text-slate-500 text-xs font-semibold">মোট সংগৃহীত অগ্রিম কর</div>
+                <div class="mt-2">
+                    <span class="text-2xl font-bold text-teal-700">৳ {{ total_advance_tax|floatformat:2 }}</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">অগ্রিম কর খাতা হতে</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border-l-4 border-l-rose-500 border-slate-200 shadow-sm">
+                <div class="text-slate-500 text-xs font-semibold">মোট সংগৃহীত বকেয়া কর</div>
+                <div class="mt-2">
+                    <span class="text-2xl font-bold text-rose-600">৳ {{ total_arrear_collected|floatformat:2 }}</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">দাবি আদায় খাতা হতে</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border-l-4 border-l-amber-500 border-slate-200 shadow-sm">
+                <div class="text-slate-500 text-xs font-semibold">অপেক্ষমান নোটিশ সংখ্যা</div>
+                <div class="mt-2 flex items-baseline justify-between">
+                    <span class="text-3xl font-bold text-amber-600">{{ pending_notices_count }}</span>
+                    <a href="{% url 'notice_section' %}" class="text-xs text-amber-700 underline font-medium">বিস্তারিত →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- টেবিল: সাম্প্রতিক লেনদেন ও নোটিশ -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- সাম্প্রতিক কর আদায় তালিকা -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-slate-800 text-sm">সাম্প্রতিক কালেকশন</h3>
+                <a href="{% url 'view_collections' %}" class="text-xs text-emerald-700 hover:underline font-bold">সব আদায় ও অনুসন্ধান →</a>
+              </div>
+
+                <div class="overflow-x-auto">
+                      <table class="w-full text-left text-xs text-slate-600">
+                      <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                          <tr>
+                              <th class="p-3">চালান নং ও তারিখ</th>
+                              <th class="p-3">করদাতা</th>
+                              <th class="p-3">ধরণ</th>
+                              <th class="p-3 text-right">পরিমাণ (৳)</th>
+                          </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100">
+                          {% for item in recent_transactions %}
+                          <tr class="hover:bg-slate-50 transition">
+                              <td class="p-3 font-mono font-medium text-slate-800">
+                                  <div>{{ item.challan_no|default:"N/A" }}</div>
+                                  <div class="text-[10px] text-slate-400">{{ item.payment_date|date:"d M, Y" }}</div>
+                              </td>
+                              <td class="p-3">
+                                  <div class="font-medium text-slate-800">{{ item.taxpayer.name }}</div>
+                                  <div class="text-[10px] text-slate-400">TIN: {{ item.taxpayer.tin }}</div>
+                              </td>
+                              <td class="p-3">
+                                  {% if item.transaction_type == 'ADVANCE' %}
+                                      <span class="px-2 py-0.5 bg-teal-100 text-teal-800 rounded font-medium">অগ্রিম</span>
+                                  {% else %}
+                                      <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-medium">বকেয়া</span>
+                                  {% endif %}
+                              </td>
+                              <td class="p-3 text-right font-bold text-slate-800">৳ {{ item.amount|floatformat:2 }}</td>
+                          </tr>
+                          {% empty %}
+                          <tr><td colspan="4" class="p-4 text-center text-slate-400">কোনো এন্ট্রি পাওয়া যায়নি।</td></tr>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- সাম্প্রতিক নোটিশ -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800 text-sm">সাম্প্রতিক জারিকৃত নোটিশ</h3>
+                    <a href="{% url 'notice_section' %}" class="text-xs text-emerald-700 hover:underline">সকল নোটিশ →</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">স্মারক নং</th>
+                                <th class="p-3">করদাতা</th>
+                                <th class="p-3">দাবিকৃত বকেয়া</th>
+                                <th class="p-3">অবস্থা</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for notice in recent_notices %}
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 font-mono font-medium text-slate-800">{{ notice.reference_no }}</td>
+                                <td class="p-3 font-medium text-slate-800">{{ notice.taxpayer.name }}</td>
+                                <td class="p-3 font-bold text-rose-600">৳ {{ notice.arrear_amount|floatformat:2 }}</td>
+                                <td class="p-3">
+                                    {% if notice.is_served %}
+                                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">জারি সম্পন্ন</span>
+                                    {% else %}
+                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded">অপেক্ষমান</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="p-4 text-center text-slate-400">কোনো নোটিশ পাওয়া যায়নি।</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ফুটার -->
+    <footer class="bg-slate-100 border-t border-slate-200 py-3 text-center text-xs text-slate-600">
+        <p>© 2026 কর অঞ্চল-নোয়াখালী | রাজস্ব প্রশাসন ও অভ্যন্তরীণ রেজিস্টার সিস্টেম</p>
+    </footer>
+
+</body>
+</html>

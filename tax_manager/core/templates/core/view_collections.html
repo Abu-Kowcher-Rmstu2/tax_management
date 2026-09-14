@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কর আদায় বিবরণী ও রেজিস্টার | কর অঞ্চল-নোয়াখালী</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #f8fafc; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white !important; }
+            .print-shadow-none { box-shadow: none !important; border: 1px solid #ccc !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- হেডার -->
+    <header class="bg-emerald-800 text-white shadow-md border-b-4 border-amber-500">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg"
+                     alt="লগো" class="w-10 h-10 bg-white rounded-full p-1 shadow">
+                <div>
+                    <h1 class="text-lg font-bold leading-none">কর অঞ্চল-নোয়াখালী</h1>
+                    <p class="text-[11px] text-emerald-200 mt-0.5">কর আদায় বিবরণী ও কেন্দ্রীয় ট্রানজেকশন রেজিস্টার</p>
+                </div>
+            </div>
+            <div class="no-print flex items-center space-x-2">
+                <a href="{% url 'add_collection' %}" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-3 py-1.5 rounded-lg shadow transition">
+                    + নতুন কর আদায়
+                </a>
+                <a href="{% url 'dashboard' %}" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg border border-emerald-600 transition">
+                    ← ড্যাশবোর্ড
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- মূল বডি -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+
+        <!-- ফিল্টারিং সেকশন -->
+        <div class="no-print bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <form method="GET" action="{% url 'view_collections' %}" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+
+                <!-- ১. টিআইএন দিয়ে সার্চ -->
+                <div class="sm:col-span-4">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">করদাতার টিআইএন (TIN Number)</label>
+                    <input type="text" name="tin" value="{{ tin_query }}" placeholder="যেমন: ১২ ডিজিটের TIN..."
+                           class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-mono">
+                </div>
+
+                <!-- ২. আদায়ের ধরন -->
+                <div class="sm:col-span-3">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">কলেকশনের ধরন (Collection Type)</label>
+                    <select name="type" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <option value="">-- সকল ধরনের আদায় --</option>
+                        <option value="ADVANCE" {% if type_query == 'ADVANCE' %}selected{% endif %}>অগ্রিম কর (Advance Tax)</option>
+                        <option value="ARREAR" {% if type_query == 'ARREAR' %}selected{% endif %}>বকেয়া কর (Arrear Tax)</option>
+                        <option value="REGULAR" {% if type_query == 'REGULAR' %}selected{% endif %}>চলতি কর দাবি (Current Demand)</option>
+                        <option value="U/S 173"{% if type_query == 'U/S 173' %}selected{% endif %}>রিটার্ণের সাথে আদায় (U/S 173)</option>
+                    </select>
+                </div>
+
+                <!-- ৩. অর্থবছর / করবর্ষ -->
+                <div class="sm:col-span-3">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">অর্থবছর / করবর্ষ (Assessment Year)</label>
+                    <input type="text" name="year" value="{{ year_query }}" placeholder="যেমন: 2025-2026"
+                           class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+
+                <!-- ৪. বাটনসমূহ -->
+                <div class="sm:col-span-2 flex space-x-2">
+                    <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2 px-3 text-sm rounded-lg transition shadow">
+                        🔍 খুঁজুন
+                    </button>
+                    {% if tin_query or type_query or year_query %}
+                        <a href="{% url 'view_collections' %}" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 text-sm rounded-lg transition flex items-center justify-center">
+                            রিসেট
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- ফলাফল ও সামারি কার্ড -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm print-shadow-none gap-3">
+            <div>
+                <h3 class="text-sm font-bold text-slate-800">
+                    কর আদায় রেজিস্টার বিবরণী
+                    {% if tin_query %}<span class="text-emerald-700 ml-1 font-mono">(TIN: {{ tin_query }})</span>{% endif %}
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    মোট এন্ট্রি: <strong>{{ total_count }}</strong> টি
+                    {% if year_query %}| অর্থবছর: <strong>{{ year_query }}</strong>{% endif %}
+                    {% if type_query %}| ধরন: <strong>{{ type_query }}</strong>{% endif %}
+                </p>
+            </div>
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
+                <div class="text-right">
+                    <span class="text-[11px] text-slate-500 uppercase block font-semibold">সর্বমোট আদায়</span>
+                    <span class="text-lg font-bold text-emerald-700">৳ {{ total_amount|floatformat:2 }}</span>
+                </div>
+                <button onclick="window.print()" class="no-print bg-slate-700 hover:bg-slate-800 text-white text-xs px-3 py-2 rounded-lg transition flex items-center gap-1 shadow">
+                    🖨️ প্রিন্ট করুন
+                </button>
+            </div>
+        </div>
+
+        <!-- টেবিল -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden print-shadow-none">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
+                        <tr>
+                            <th class="p-3">ক্রমিক</th>
+                            <th class="p-3">করদাতার বিবরণ (TIN ও নাম)</th>
+                            <th class="p-3">করের ধরন</th>
+                            <th class="p-3">অর্থবছর</th>
+                            <th class="p-3">চালান নম্বর ও তারিখ</th>
+                            <th class="p-3">জমার তারিখ</th>
+                            <th class="p-3">মাধ্যম ও ব্যাংক</th>
+                            <th class="p-3 text-right">আদায়ের পরিমাণ (৳)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for item in collections %}
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-slate-400 font-mono">{{ forloop.counter }}</td>
+                            <td class="p-3">
+                                <div class="font-bold text-slate-800 text-sm">{{ item.taxpayer.name }}</div>
+                                <div class="text-[11px] text-emerald-700 font-mono">TIN: {{ item.taxpayer.tin }}</div>
+                                <div class="text-[10px] text-slate-400">{{ item.taxpayer.holding_or_circle }}</div>
+                            </td>
+                            <td class="p-3">
+                                {% if item.transaction_type == 'ADVANCE' %}
+                                    <span class="px-2 py-0.5 bg-teal-100 text-teal-800 rounded font-semibold text-[11px]">অগ্রিম কর</span>
+                                {% elif item.transaction_type == 'ARREAR' %}
+                                    <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-semibold text-[11px]">বকেয়া কর</span>
+                                    {% elif item.transaction_type == 'U/S 173' %}
+                                        <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-semibold text-[11px]">রিটার্নের সথে আদায়</span>
+                                {% else %}
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-800 rounded font-semibold text-[11px]">চলতি কর</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-3 font-mono font-medium text-slate-700">{{ item.fiscal_year }}</td>
+                            <td class="p-3">
+                                <div class="font-mono font-bold text-slate-800">{{ item.challan_no|default:"-" }}</div>
+                                {% if item.challan_date %}
+                                    <div class="text-[10px] text-slate-400">চালান তাং: {{ item.challan_date|date:"d/m/Y" }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="p-3 font-medium text-slate-700">
+                                {{ item.payment_date|date:"d/m/Y" }}
+                            </td>
+                            <td class="p-3 text-[11px]">
+                                <div>{{ item.get_payment_mode_display }}</div>
+                                <div class="text-slate-400 text-[10px]">{{ item.bank_and_branch|default:"" }}</div>
+                            </td>
+                            <td class="p-3 text-right font-mono font-bold text-slate-900 text-sm">
+                                ৳ {{ item.amount|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="p-8 text-center text-slate-400">
+                                কোনো কর আদায়ের তথ্য পাওয়া যায়নি।
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if collections %}
+                    <tfoot class="bg-slate-50 font-bold border-t-2 border-slate-200 text-slate-800">
+                        <tr>
+                            <td colspan="7" class="p-3 text-right uppercase">সর্বমোট সংগৃহীত কর:</td>
+                            <td class="p-3 text-right font-mono text-emerald-800 text-base">
+                                ৳ {{ total_amount|floatformat:2 }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ফুটার -->
+    <footer class="no-print bg-slate-100 border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        <p>© 2026 কর অঞ্চল-নোয়াখালী | জাতীয় রাজস্ব বোর্ড</p>
+    </footer>
+
+</body>
+</html>

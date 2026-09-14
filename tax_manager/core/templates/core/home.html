@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কর অঞ্চল-নোয়াখালী | কর ব্যবস্থাপনা সিস্টেম</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Kalpurush / Noto Sans Bengali -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- হেডার ও লগো সেকশন -->
+    <header class="bg-emerald-800 text-white shadow-md border-b-4 border-amber-500">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-4">
+                <!-- সরকারি মনোগ্রাম -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg"
+                     alt="গণপ্রজাতন্ত্রী বাংলাদেশ সরকার"
+                     class="w-16 h-16 bg-white rounded-full p-1 shadow">
+                <div>
+                    <h3 class="text-sm font-medium text-emerald-100">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</h3>
+                    <h1 class="text-2xl font-bold tracking-wide">কর অঞ্চল-নোয়াখালী</h1>
+                    <p class="text-xs text-emerald-200">জাতীয় রাজস্ব বোর্ড (এনবিআর)</p>
+                </div>
+            </div>
+            <div class="text-center sm:text-right">
+                <span class="inline-block bg-emerald-900 text-emerald-200 text-xs px-3 py-1 rounded-full border border-emerald-700">
+                    অভ্যন্তরীণ কর ব্যবস্থাপনা ও রেজিস্টার সিস্টেম
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- মূল বডি ও লগইন কার্ড -->
+    <main class="flex-grow flex items-center justify-center px-4 py-10">
+        <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+
+            <!-- তথ্য প্যানেল (বাম পাশ) -->
+            <div class="bg-gradient-to-br from-emerald-700 to-emerald-900 text-white p-8 flex flex-col justify-between">
+                <div>
+                    <span class="bg-emerald-600 text-emerald-100 text-xs font-semibold px-2.5 py-1 rounded">অফিসিয়াল পোর্টাল</span>
+                    <h2 class="text-2xl font-bold mt-4 leading-snug">অগ্রিম ও বকেয়া কর রেজিস্টার ব্যবস্থাপনা</h2>
+                    <p class="text-emerald-100 text-sm mt-3 leading-relaxed">
+                        করদাতাদের তথ্যাদি সংরক্ষণ, অগ্রিম কর হিসাবায়ন, বকেয়া ডিমান্ড ট্র্যাকিং এবং প্রাতিষ্ঠানিক নোটিশ সহজে প্রস্তুত করার ডিজিটাল প্ল্যাটফর্ম।
+                    </p>
+                </div>
+                <div class="mt-8 border-t border-emerald-600/60 pt-4 text-xs text-emerald-200 space-y-1">
+                    <p>• অগ্রিম কর রেজিস্টার (Advance Tax)</p>
+                    <p>• বকেয়া কর রেজিস্টার (Arrear Ledger)</p>
+                    <p>• ডিমান্ড নোটিশ ও রসিদ প্রস্তুতকরণ</p>
+                </div>
+            </div>
+
+            <!-- লগইন ফর্ম (ডান পাশ) -->
+            <div class="p-8">
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-slate-800">অফিস লগইন</h3>
+                    <p class="text-xs text-slate-500 mt-1">আপনার প্রাতিষ্ঠানিক ইউজার আইডি ও পাসওয়ার্ড লিখুন</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-3 text-xs rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'home' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ইউজারনেম (Username)</label>
+                        <input type="text" name="username" required
+                               placeholder="ইউজারনেম দিন"
+                               class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">পাসওয়ার্ড (Password)</label>
+                        <input type="password" name="password" required
+                               placeholder="••••••••"
+                               class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
+                    </div>
+
+                    <button type="submit"
+                            class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 shadow-md hover:shadow">
+                        লগইন করুন
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-[11px] text-slate-400">
+                        শুধুমাত্র অনুমোদিত কর্মকর্তাদের ব্যবহারের জন্য সংরক্ষিত।
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ফুটার -->
+    <footer class="bg-slate-100 border-t border-slate-200 py-3 text-center text-xs text-slate-600">
+        <p>© 2026 কর অঞ্চল-নোয়াখালী | সার্বিক তত্ত্বাবধানে: জাতীয় রাজস্ব বোর্ড (NBR)</p>
+    </footer>
+
+</body>
+</html>

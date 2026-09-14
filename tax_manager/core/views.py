@@ -1,0 +1,434 @@
+
+# Create your views here.
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Sum
+from .models import Taxpayer, TaxTransaction, TaxNotice, TaxAssessment
+
+def home_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        user_name = request.POST.get('username')
+        pass_word = request.POST.get('password')
+        user = authenticate(request, username=user_name, password=pass_word)
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'ইউজারনেম অথবা পাসওয়ার্ড সঠিক নয়।')
+
+    return render(request, 'core/home.html')
+def logout_view(request):
+    logout(request)
+    return redirect('home')
+
+
+@login_required(login_url='home')
+def dashboard_view(request):
+    total_taxpayers = Taxpayer.objects.filter(is_active=True).count()
+
+    total_advance_tax = TaxTransaction.objects.filter(
+        transaction_type='ADVANCE'
+    ).aggregate(total=Sum('amount'))['total'] or 0.00
+
+    total_arrear_collected = TaxTransaction.objects.filter(
+        transaction_type='ARREAR'
+    ).aggregate(total=Sum('amount'))['total'] or 0.00
+
+    total_arrear_demand = TaxAssessment.objects.aggregate(
+        total=Sum('arrear_brought_forward')
+    )['total'] or 0.00
+
+    net_arrear_due = max(0.00, float(total_arrear_demand) - float(total_arrear_collected))
+    pending_notices_count = TaxNotice.objects.filter(is_served=False).count()
+
+    recent_transactions = TaxTransaction.objects.select_related('taxpayer').order_by('-payment_date')[:5]
+    recent_notices = TaxNotice.objects.select_related('taxpayer').order_by('-issue_date')[:5]
+
+    context = {
+        'total_taxpayers': total_taxpayers,
+        'total_advance_tax': total_advance_tax,
+        'total_arrear_collected': total_arrear_collected,
+        'net_arrear_due': net_arrear_due,
+        'pending_notices_count': pending_notices_count,
+        'recent_transactions': recent_transactions,
+        'recent_notices': recent_notices,
+    }
+    return render(request, 'core/dashboard.html', context)
+
+
+@login_required(login_url='home')
+def advance_register_view(request):
+    """অগ্রিম কর রেজিস্টার"""
+    records = TaxTransaction.objects.filter(transaction_type='ADVANCE').select_related('taxpayer').order_by('-payment_date')
+    total_amount = records.aggregate(total=Sum('amount'))['total'] or 0.00
+    return render(request, 'core/register_advance.html', {'records': records, 'total_amount': total_amount})
+
+
+from decimal import Decimal
+from django.db.models import Sum
+
+@login_required(login_url='home')
+def arrear_register_view(request):
+    """বকেয়া কর রেজিস্টার ভিউ (তালিকা ও সার্চ)"""
+    tin_query = request.GET.get('tin', '').strip()
+    year_query = request.GET.get('year', '').strip()
+
+    records = ArrearRegister.objects.select_related('taxpayer').order_by('-created_at')
+
+    if tin_query:
+        records = records.filter(taxpayer__tin__icontains=tin_query)
+    if year_query:
+        records = records.filter(assessment_year__icontains=year_query)
+
+    # সারসংক্ষেপ হিসেব
+    total_arrear_demand = records.aggregate(total=Sum('total_arrear'))['total'] or Decimal('0.00')
+    total_collected = records.aggregate(total=Sum('collection'))['total'] or Decimal('0.00')
+    total_due = records.aggregate(total=Sum('due_amount'))['total'] or Decimal('0.00')
+
+    context = {
+        'records': records,
+        'tin_query': tin_query,
+        'year_query': year_query,
+        'total_arrear_demand': total_arrear_demand,
+        'total_collected': total_collected,
+        'total_due': total_due,
+        'total_count': records.count(),
+    }
+    return render(request, 'core/arrear_form.html', context)
+
+
+@login_required(login_url='home')
+def notice_section_view(request):
+    """নোটিশ সেকশন"""
+    notices = TaxNotice.objects.select_related('taxpayer').order_by('-issue_date')
+    pending_count = notices.filter(is_served=False).count()
+    return render(request, 'core/notice_section.html', {'notices': notices, 'pending_count': pending_count})
+
+@login_required(login_url='home')
+def add_taxpayer_view(request):
+    if request.method == 'POST':
+        tin = request.POST.get('tin', '').strip()
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        email = request.POST.get('email', '').strip()
+        circle = request.POST.get('circle', '').strip()
+
+        # ৩ লাইনের ঠিকানা
+        address_line1 = request.POST.get('address_line1', '').strip()
+        address_line2 = request.POST.get('address_line2', '').strip()
+        address_line3 = request.POST.get('address_line3', '').strip()
+
+        if Taxpayer.objects.filter(tin=tin).exists():
+            messages.error(request, f'TIN নম্বর {tin} ইতিমধ্যেই ডাটাবেজে রয়েছে!')
+            return render(request, 'core/add_taxpayer.html')
+
+        Taxpayer.objects.create(
+            tin=tin,
+            name=name,
+            phone=phone,
+            email=email,
+            holding_or_circle=circle,
+            address_line1=address_line1,
+            address_line2=address_line2,
+            address_line3=address_line3,
+            is_active=True
+        )
+        messages.success(request, f'করদাতা "{name}" (TIN: {tin}) সফলভাবে নিবন্ধন করা হয়েছে।')
+        return redirect('dashboard')
+
+    return render(request, 'core/add_taxpayer.html')
+
+from decimal import Decimal
+
+@login_required(login_url='home')
+def add_collection_view(request):
+    taxpayers = Taxpayer.objects.filter(is_active=True).order_by('name')
+
+    if request.method == 'POST':
+        taxpayer_id = request.POST.get('taxpayer_id')
+        transaction_type = request.POST.get('transaction_type')
+        fiscal_year = request.POST.get('fiscal_year', '').strip()
+        challan_no = request.POST.get('challan_no', '').strip()
+        payment_date = request.POST.get('payment_date')
+        challan_date = request.POST.get('challan_date') or None
+        amount = Decimal(request.POST.get('amount') or '0.00')
+        payment_mode = request.POST.get('payment_mode')
+        bank_and_branch = request.POST.get('bank_and_branch', '').strip()
+        remarks = request.POST.get('remarks', '').strip()
+
+        taxpayer = get_object_or_404(Taxpayer, id=taxpayer_id)
+
+        # ১. কালেকশন লেনদেন সংরক্ষণ
+        TaxTransaction.objects.create(
+            taxpayer=taxpayer,
+            transaction_type=transaction_type,
+            fiscal_year=fiscal_year,
+            challan_no=challan_no,
+            challan_date=challan_date,
+            payment_date=payment_date,
+            amount=amount,
+            payment_mode=payment_mode,
+            bank_and_branch=bank_and_branch,
+            remarks=remarks
+        )
+
+        # ২. বকেয়া কর হলে ArrearRegister-এ কালেকশন আপডেট ও অবশিষ্ট বকেয়া পুনঃগণনা
+        if transaction_type == 'ARREAR':
+            arrear_entry = ArrearRegister.objects.filter(
+                taxpayer=taxpayer,
+                assessment_year=fiscal_year
+            ).first()
+
+            if arrear_entry:
+                arrear_entry.collection += amount
+                arrear_entry.save()  # save() মেথড স্বয়ংক্রিয়ভাবে due_amount রিক্যালকুলেট করবে
+
+        type_text = "অগ্রিম কর" if transaction_type == 'ADVANCE' else "বকেয়া কর"
+        messages.success(request, f'করদাতা {taxpayer.name}-এর {type_text} বাবদ ৳{amount} আদায় সফলভাবে সংরক্ষিত হয়েছে।')
+        return redirect('dashboard')
+
+    return render(request, 'core/add_collection.html', {'taxpayers': taxpayers})
+
+from django.db.models import Q
+@login_required(login_url='home')
+def taxpayer_list_view(request):
+    """করদাতা অনুসন্ধান ও তালিকা ভিউ"""
+    query = request.GET.get('q', '').strip()
+    circle_filter = request.GET.get('circle', '').strip()
+
+    taxpayers = Taxpayer.objects.all().order_by('-id')
+
+    if query:
+        taxpayers = taxpayers.filter(
+            Q(tin__icontains=query) |
+            Q(name__icontains=query) |
+            Q(phone__icontains=query) |
+            Q(address_line1__icontains=query) |
+            Q(address_line2__icontains=query) |
+            Q(address_line3__icontains=query)
+        )
+
+    if circle_filter:
+        taxpayers = taxpayers.filter(holding_or_circle__icontains=circle_filter)
+
+    circles = Taxpayer.objects.values_list('holding_or_circle', flat=True).distinct()
+
+    context = {
+        'taxpayers': taxpayers,
+        'query': query,
+        'circle_filter': circle_filter,
+        'circles': [c for c in circles if c],
+        'total_found': taxpayers.count(),
+    }
+    return render(request, 'core/taxpayer_list.html', context)
+
+
+@login_required(login_url='home')
+def edit_taxpayer_view(request, pk):
+    """করদাতার তথ্য এডিট ও আপডেট ভিউ"""
+    taxpayer = get_object_or_404(Taxpayer, pk=pk)
+
+    if request.method == 'POST':
+        tin = request.POST.get('tin', '').strip()
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        email = request.POST.get('email', '').strip()
+        circle = request.POST.get('circle', '').strip()
+        address_line1 = request.POST.get('address_line1', '').strip()
+        address_line2 = request.POST.get('address_line2', '').strip()
+        address_line3 = request.POST.get('address_line3', '').strip()
+        is_active = request.POST.get('is_active') == 'on'
+
+        # যদি TIN পরিবর্তন করা হয়, তবে অন্য কারও সাথে মিলে যায় কিনা যাচাই
+        if Taxpayer.objects.filter(tin=tin).exclude(pk=pk).exists():
+            messages.error(request, f'TIN নম্বর {tin} ইতিমধ্যেই অন্য একজন করদাতার নামে নিবন্ধিত!')
+        else:
+            taxpayer.tin = tin
+            taxpayer.name = name
+            taxpayer.phone = phone
+            taxpayer.email = email
+            taxpayer.holding_or_circle = circle
+            taxpayer.address_line1 = address_line1
+            taxpayer.address_line2 = address_line2
+            taxpayer.address_line3 = address_line3
+            taxpayer.is_active = is_active
+            taxpayer.save()
+
+            messages.success(request, f'করদাতা "{name}"-এর তথ্য সফলভাবে আপডেট করা হয়েছে।')
+            return redirect('taxpayer_list')
+
+    return render(request, 'core/edit_taxpayer.html', {'taxpayer': taxpayer})
+
+    from django.db.models import Sum
+
+@login_required(login_url='home')
+def view_collections_view(request):
+    """সকল কর আদায় তালিকা এবং মাল্টি-ফিল্টার অনুসন্ধান ভিউ"""
+    tin_query = request.GET.get('tin', '').strip()
+    type_query = request.GET.get('type', '').strip()
+    year_query = request.GET.get('year', '').strip()
+
+    collections = TaxTransaction.objects.select_related('taxpayer').order_by('-payment_date', '-id')
+
+    # ফিল্টারিং লজিক
+    if tin_query:
+        collections = collections.filter(taxpayer__tin__icontains=tin_query)
+    if type_query:
+        collections = collections.filter(transaction_type=type_query)
+    if year_query:
+        collections = collections.filter(fiscal_year__icontains=year_query)
+
+    # বর্তমান ফিল্টার করা রেকর্ডের মোট আদায়
+    total_amount = collections.aggregate(total=Sum('amount'))['total'] or 0.00
+
+    # ড্রপডাউনের জন্য অর্থবছরগুলোর তালিকা
+    available_years = TaxTransaction.objects.values_list('fiscal_year', flat=True).distinct().order_by('-fiscal_year')
+
+    context = {
+        'collections': collections,
+        'tin_query': tin_query,
+        'type_query': type_query,
+        'year_query': year_query,
+        'total_amount': total_amount,
+        'total_count': collections.count(),
+        'available_years': available_years,
+    }
+    return render(request, 'core/view_collections.html', context)
+
+
+
+
+
+
+
+from django.http import JsonResponse
+
+@login_required(login_url='home')
+def search_taxpayer_api(request):
+    """TIN নম্বর দিয়ে তাৎক্ষণিক করদাতা খুঁজে তথ্য রিটার্ন করার API"""
+    tin = request.GET.get('tin', '').strip()
+    if not tin:
+        return JsonResponse({'success': False, 'message': 'দয়া করে একটি TIN নম্বর প্রদান করুন।'})
+
+    taxpayer = Taxpayer.objects.filter(tin=tin).first()
+    if taxpayer:
+        return JsonResponse({
+            'success': True,
+            'id': taxpayer.id,
+            'name': taxpayer.name,
+            'tin': taxpayer.tin,
+            'circle': taxpayer.holding_or_circle,
+            'phone': taxpayer.phone,
+            'address': taxpayer.full_address()
+        })
+    else:
+        return JsonResponse({'success': False, 'message': f'TIN "{tin}" দিয়ে কোনো করদাতা ডাটাবেজে পাওয়া যায়নি!'})
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.contrib import messages
+from .models import Taxpayer, ArrearRegister
+
+# 1. AJAX Endpoint to search Taxpayer by TIN
+def search_taxpayer_by_tin(request):
+    tin = request.GET.get('tin', '').strip()
+    taxpayer = Taxpayer.objects.filter(tin=tin).first()
+    if taxpayer:
+        return JsonResponse({
+            'success': True,
+            'taxpayer_id': taxpayer.id,
+            'name': taxpayer.name,
+        })
+    return JsonResponse({'success': False, 'message': 'করদাতা পাওয়া যায়নি'})
+
+# 2. Add / Entry Arrear Form
+def add_arrear(request):
+    if request.method == 'POST':
+        taxpayer_id = request.POST.get('taxpayer_id')
+        assessment_year = request.POST.get('assessment_year')
+        demand = float(request.POST.get('demand') or 0.0)
+        fine = float(request.POST.get('fine') or 0.0)
+        collection = float(request.POST.get('collection') or 0.0)
+
+        taxpayer = get_object_or_404(Taxpayer, id=taxpayer_id)
+
+        arrear, created = ArrearRegister.objects.update_or_create(
+            taxpayer=taxpayer,
+            assessment_year=assessment_year,
+            defaults={
+                'demand': demand,
+                'fine': fine,
+                'collection': collection,
+            }
+        )
+        messages.success(request, f"{taxpayer.name}-এর {assessment_year} করবর্ষের বকেয়া সফলভাবে সংরক্ষিত হয়েছে।")
+        return redirect('arrear_list')
+
+    return render(request, 'core/arrear_form.html')
+
+# 3. Quick Payment / Arrear Collection View
+def collect_arrear_payment(request, arrear_id):
+    arrear = get_object_or_404(ArrearRegister, id=arrear_id)
+    if request.method == 'POST':
+        pay_amount = float(request.POST.get('pay_amount') or 0.0)
+        arrear.collection += pay_amount
+        arrear.save()  # Auto-recalculates due_amount via model save()
+        messages.success(request, f"৳ {pay_amount} সফলভাবে আদায় হিসেবে যুক্ত হয়েছে।")
+        return redirect('arrear_list')
+
+    return render(request, 'core/collect_payment.html', {'arrear': arrear})
+
+    from datetime import datetime
+
+# 4. Arrear List View with Date Duration Filtering
+@login_required(login_url='home')
+def arrear_list(request):
+    start_date = request.GET.get('start_date', '').strip()
+    end_date = request.GET.get('end_date', '').strip()
+    tin_query = request.GET.get('tin', '').strip()
+
+    arrears = ArrearRegister.objects.select_related('taxpayer').all().order_by('-created_at')
+
+    # ইতিমধ্যে সংরক্ষিত TaxTransaction কালেকশনসমূহ ArrearRegister-এর সাথে সিঙ্ক করা
+    for item in arrears:
+        total_paid = TaxTransaction.objects.filter(
+            taxpayer=item.taxpayer,
+            fiscal_year=item.assessment_year,
+            transaction_type='ARREAR'
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+
+        if item.collection != total_paid:
+            item.collection = total_paid
+            item.save()  # due_amount স্বয়ংক্রিয়ভাবে আপডেট হবে
+
+    # ফিল্টারিং অপশন
+    if start_date:
+        arrears = arrears.filter(created_at__date__gte=start_date)
+    if end_date:
+        arrears = arrears.filter(created_at__date__lte=end_date)
+    if tin_query:
+        arrears = arrears.filter(taxpayer__tin__icontains=tin_query)
+
+    # সর্বমোট সারসংক্ষেপ হিসেব
+    total_demand = arrears.aggregate(total=Sum('total_arrear'))['total'] or Decimal('0.00')
+    total_collection = arrears.aggregate(total=Sum('collection'))['total'] or Decimal('0.00')
+    total_due = arrears.aggregate(total=Sum('due_amount'))['total'] or Decimal('0.00')
+
+    context = {
+        'arrears': arrears,
+        'start_date': start_date,
+        'end_date': end_date,
+        'tin_query': tin_query,
+        'total_demand': total_demand,
+        'total_collection': total_collection,
+        'total_due': total_due,
+        'total_count': arrears.count(),
+    }
+    return render(request, 'core/arrear_list.html', context)
