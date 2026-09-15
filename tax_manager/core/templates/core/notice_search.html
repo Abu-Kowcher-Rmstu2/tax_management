@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বকেয়া নোটিশ প্রস্তুতকরণ | কর অঞ্চল-নোয়াখালী</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Hind Siliguri', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- হেডার -->
+    <header class="bg-emerald-800 text-white shadow border-b-4 border-amber-500">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <h1 class="text-base font-bold">কর অঞ্চল-নোয়াখালী | নোটিশ অটোমেশন</h1>
+            <a href="{% url 'dashboard' %}" class="text-xs bg-emerald-900 px-3 py-1.5 rounded hover:bg-emerald-700">ড্যাশবোর্ড</a>
+        </div>
+    </header>
+
+    <main class="max-w-4xl w-full mx-auto p-6 flex-grow space-y-6">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-3 text-sm rounded bg-amber-50 text-amber-900 border border-amber-200">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- সার্চ বক্স -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h2 class="text-base font-bold text-slate-800 mb-2">করদাতার টিআইএন (TIN) দিয়ে বকেয়া যাচাই</h2>
+            <p class="text-xs text-slate-500 mb-4">১২ ডিজিটের টিআইএন লিখে সার্চ করলে স্বয়ংক্রিয়ভাবে বকেয়া নোটিশ তৈরি হবে।</p>
+            <form method="GET" class="flex gap-2">
+                <input type="text" name="tin" value="{{ tin_query }}" placeholder="১২ ডিজিটের TIN লিখুন..." class="flex-grow border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" required>
+                <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-2 rounded-lg font-bold text-sm shadow">অনুসন্ধান</button>
+            </form>
+        </div>
+
+        {% if taxpayer %}
+<!-- করদাতার তথ্য ও তারিখ নির্বাচন ফর্ম -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
+        <div>
+            <h3 class="text-lg font-bold text-slate-900">{{ taxpayer.name }}</h3>
+            <p class="text-xs text-slate-500 font-mono mt-0.5">TIN: {{ taxpayer.tin }} | সার্কেল: {{ taxpayer.holding_or_circle }}</p>
+            <p class="text-xs text-slate-600 mt-1">{{ taxpayer.address_line1 }}, {{ taxpayer.address_line2 }}</p>
+        </div>
+
+        {% if arrear_records %}
+        <!-- তারিখ নির্বাচন এবং প্রিন্ট ফর্ম -->
+        <form action="{% url 'print_arrear_notice' taxpayer.id %}" method="GET" target="_blank" class="flex flex-wrap items-end gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">ইস্যুর তারিখ</label>
+                <input type="date" name="issue_date" id="issue_date_input" class="text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500 focus:outline-none" required>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">পরিশোধের শেষ তারিখ</label>
+                <input type="date" name="deadline_date" id="deadline_date_input" class="text-xs border border-slate-300 rounded px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500 focus:outline-none" required>
+            </div>
+            <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded shadow transition inline-flex items-center gap-1.5">
+                <span>🖨️</span> নোটিশ প্রিন্ট করুন
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- বকেয়া ছক -->
+    <div>
+        <h4 class="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">অদ্যাবধি অপরিশোধিত বকেয়া দাবিসমূহ:</h4>
+        <div class="overflow-x-auto border rounded-lg">
+            <table class="w-full text-xs text-left">
+                <thead class="bg-slate-100 text-slate-700 font-semibold border-b">
+                    <tr>
+                        <th class="p-3">করবর্ষ</th>
+                        <th class="p-3 text-right">মূল কর দাবি (৳)</th>
+                        <th class="p-3 text-right">জরিমানা/সুদ (৳)</th>
+                        <th class="p-3 text-right text-rose-700 font-bold">মোট বকেয়া দাবি (৳)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {% for record in arrear_records %}
+                    <tr>
+                        <td class="p-3 font-medium">{{ record.assessment_year }}</td>
+                        <td class="p-3 text-right">{{ record.demand|floatformat:2 }}</td>
+                        <td class="p-3 text-right">{{ record.fine|floatformat:2 }}</td>
+                        <td class="p-3 text-right font-bold text-rose-700">৳ {{ record.due_amount|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="p-4 text-center text-slate-400">কোনো বকেয়া পাওয়া যায়নি।</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ডিফল্টভাবে আজকের তারিখ এবং ১৫ দিন পরের তারিখ সেট করা
+    const today = new Date();
+    const deadline = new Date();
+    deadline.setDate(today.getDate() + 15);
+
+    const formatDate = (d) => d.toISOString().split('T')[0];
+
+    const issueInput = document.getElementById('issue_date_input');
+    const deadlineInput = document.getElementById('deadline_date_input');
+    if (issueInput && deadlineInput) {
+        issueInput.value = formatDate(today);
+        deadlineInput.value = formatDate(deadline);
+    }
+</script>
+{% endif %}
+    </main>
+
+    <footer class="bg-slate-100 border-t py-3 text-center text-xs text-slate-500">
+        © 2026 কর অঞ্চল-নোয়াখালী
+    </footer>
+</body>
+</html>

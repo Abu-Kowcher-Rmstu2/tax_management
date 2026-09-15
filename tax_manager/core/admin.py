@@ -26,3 +26,12 @@ class TaxNoticeAdmin(admin.ModelAdmin):
     list_display = ('reference_no', 'taxpayer', 'notice_type', 'arrear_amount', 'issue_date', 'due_date', 'is_served')
     list_filter = ('notice_type', 'is_served')
     search_fields = ('reference_no', 'taxpayer__tin', 'taxpayer__name')
+
+
+from django.contrib import admin
+from .models import NoticeSetting
+
+@admin.register(NoticeSetting)
+class NoticeSettingAdmin(admin.ModelAdmin):
+    list_display = ('officer_name', 'designation', 'sender_circle', 'phone_number', 'is_active')
+    list_editable = ('is_active',)

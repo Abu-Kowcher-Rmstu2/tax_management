@@ -41,5 +41,7 @@ urlpatterns = [
     path('arrears/add/', views.add_arrear, name='add_arrear'),
     path('arrears/pay/<int:arrear_id>/', views.collect_arrear_payment, name='collect_arrear_payment'),
     path('api/search-taxpayer/', views.search_taxpayer_by_tin, name='search_taxpayer_by_tin'),
+    path('notices/arrear/search/', views.generate_arrear_notice_view, name='generate_arrear_notice'),
+path('notices/arrear/print/<int:taxpayer_id>/', views.print_arrear_notice_view, name='print_arrear_notice'),
 
 ]

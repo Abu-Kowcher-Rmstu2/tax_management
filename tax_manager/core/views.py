@@ -432,3 +432,111 @@ def arrear_list(request):
         'total_count': arrears.count(),
     }
     return render(request, 'core/arrear_list.html', context)
+
+
+
+
+
+
+from datetime import date, timedelta
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Taxpayer, ArrearRegister, TaxNotice
+
+# Helper function to convert English digits to Bengali digits
+def to_bengali_digits(number):
+    en_to_bn = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
+    return str(number).translate(en_to_bn)
+
+@login_required(login_url='home')
+def generate_arrear_notice_view(request):
+    """TIN সার্চ করে বকেয়া তথ্য যাচাই এবং নোটিশ প্রস্তুত করার ভিউ"""
+    tin_query = request.GET.get('tin', '').strip()
+    taxpayer = None
+    arrear_records = []
+    total_due = Decimal('0.00')
+
+    if tin_query:
+        taxpayer = Taxpayer.objects.filter(tin=tin_query).first()
+        if taxpayer:
+            # করদাতার যেসব করবর্ষে অবশিষ্ট বকেয়া আছে তা খোঁজা
+            arrear_records = ArrearRegister.objects.filter(
+                taxpayer=taxpayer,
+                due_amount__gt=0
+            ).order_by('assessment_year')
+
+            total_due = sum((record.due_amount for record in arrear_records), Decimal('0.00'))
+
+            if not arrear_records.exists():
+                messages.warning(request, f'করদাতা {taxpayer.name}-এর কোনো অবশিষ্ট বকেয়া নেই!')
+        else:
+            messages.error(request, f'TIN: {tin_query} দিয়ে কোনো করদাতা খুঁজে পাওয়া যায়নি!')
+
+    context = {
+        'tin_query': tin_query,
+        'taxpayer': taxpayer,
+        'arrear_records': arrear_records,
+        'total_due': total_due,
+    }
+    return render(request, 'core/notice_search.html', context)
+
+
+from datetime import date, datetime, timedelta
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Taxpayer, ArrearRegister, TaxNotice
+
+def to_bengali_digits(number):
+    en_to_bn = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
+    return str(number).translate(en_to_bn)
+
+from .models import Taxpayer, ArrearRegister, TaxNotice, NoticeSetting
+
+@login_required(login_url='home')
+def print_arrear_notice_view(request, taxpayer_id):
+    taxpayer = get_object_or_404(Taxpayer, id=taxpayer_id)
+    arrear_records = ArrearRegister.objects.filter(taxpayer=taxpayer, due_amount__gt=0).order_by('assessment_year')
+
+    req_issue_date = request.GET.get('issue_date')
+    req_deadline_date = request.GET.get('deadline_date')
+
+    today = datetime.strptime(req_issue_date, '%Y-%m-%d').date() if req_issue_date else date.today()
+    deadline_date = datetime.strptime(req_deadline_date, '%Y-%m-%d').date() if req_deadline_date else (today + timedelta(days=15))
+
+    issue_date_bn = to_bengali_digits(today.strftime('%d/%m/%Y')) + ' খ্রি.'
+    deadline_date_bn = to_bengali_digits(deadline_date.strftime('%d/%m/%Y')) + ' খ্রি.'
+    file_no_bn = to_bengali_digits(taxpayer.tin)
+
+    total_demand = sum((r.demand for r in arrear_records), Decimal('0.00'))
+    total_fine = sum((r.fine for r in arrear_records), Decimal('0.00'))
+    grand_total = sum((r.due_amount for r in arrear_records), Decimal('0.00'))
+
+    # ডাটাবেজ থেকে সক্রিয় লেটারহেড ও প্রেরকের সেটিংস লোড করা
+    notice_setting = NoticeSetting.objects.filter(is_active=True).first()
+
+    TaxNotice.objects.update_or_create(
+        taxpayer=taxpayer,
+        reference_no=taxpayer.tin,
+        defaults={
+            'arrear_amount': grand_total,
+            'issue_date': today,
+            'due_date': deadline_date,
+            'is_served': True,
+        }
+    )
+
+    context = {
+        'taxpayer': taxpayer,
+        'arrear_records': arrear_records,
+        'file_no': file_no_bn,
+        'issue_date': issue_date_bn,
+        'deadline_date': deadline_date_bn,
+        'total_demand': total_demand,
+        'total_fine': total_fine,
+        'grand_total': grand_total,
+        'setting': notice_setting,
+    }
+    return render(request, 'core/arrear_notice_print.html', context)

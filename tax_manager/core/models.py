@@ -129,3 +129,27 @@ class ArrearRegister(models.Model):
 
     def __str__(self):
         return f"{self.taxpayer.tin} - {self.assessment_year} (বকেয়া: {self.due_amount})"
+
+        from django.db import models
+
+class NoticeSetting(models.Model):
+    # লেটারহেড শাখা
+    govt_title = models.CharField(max_length=255, default="গণপ্রজাতন্ত্রী বাংলাদেশ সরকার", verbose_name="সরকারের নাম")
+    office_title = models.CharField(max_length=255, default="উপ কর কমিশনারের কার্যালয়", verbose_name="কার্যালয়ের নাম")
+    circle_line = models.CharField(max_length=255, default="সার্কেল-১৩ (ফেনী সদর), কর অঞ্চল-নোয়াখালী।", verbose_name="সার্কেল ও অঞ্চল")
+    office_address = models.CharField(max_length=500, default="৩৪২/১, ফরিদা কুদ্দুস নিবাস, কুমিল্লা বাসস্ট্যান্ড, ট্রাংক রোড, ফেনী সদর, ফেনী।", verbose_name="কার্যালয়ের ঠিকানা")
+
+    # প্রেরক কর্মকর্তা শাখা (Sender Officer)
+    officer_name = models.CharField(max_length=150, default="আব্দুল হক", verbose_name="কর্মকর্তার নাম")
+    designation = models.CharField(max_length=150, default="উপকর কমিশনার", verbose_name="পদবী")
+    sender_circle = models.CharField(max_length=150, default="সার্কেল-১৩ (ফেনী সদর)", verbose_name="সার্কেল")
+    sender_zone = models.CharField(max_length=150, default="কর অঞ্চল- নোয়াখালী।", verbose_name="অঞ্চল")
+    phone_number = models.CharField(max_length=50, default="০২৩৩৪৪-৭৩৬০০", verbose_name="ফোন নম্বর")
+    is_active = models.BooleanField(default=True, verbose_name="সক্রিয় কনফিগারেশন")
+
+    class Meta:
+        verbose_name = "নোটিশ প্যাড ও প্রেরক সেটিংস"
+        verbose_name_plural = "নোটিশ প্যাড ও প্রেরক সেটিংস"
+
+    def __str__(self):
+        return f"{self.officer_name} - {self.designation} ({self.sender_circle})"
