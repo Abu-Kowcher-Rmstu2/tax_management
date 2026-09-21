@@ -6,103 +6,132 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* প্রিন্টারে A4 সাইজ ও মার্জিন লক */
         @page {
-            size: A4;
-            margin: 15mm 20mm 15mm 20mm;
+            size: A4 portrait;
+            margin: 12mm 15mm 12mm 15mm;
         }
-        body {
-            font-family: 'Noto Sans Bengali', 'Kalpurush', Arial, sans-serif;
-            font-size: 14.5px;
-            line-height: 1.6;
-            color: #000;
-            background: #fff;
+
+        html, body {
             margin: 0;
-            padding: 20px;
-        }
-        .page {
-            width: 180mm;
-            margin: 0 auto;
-        }
-        .header {
-            text-align: center;
-            line-height: 1.35;
-            margin-bottom: 20px;
-        }
-        .gov-logo {
-            width: 58px;
-            height: 58px;
-            margin: 0 auto 6px auto;
-            display: block;
-        }
-        .header h3 {
-            font-size: 17px;
-            margin: 1px 0;
-            font-weight: 700;
-        }
-        .header h4 {
-            font-size: 15px;
-            margin: 1px 0;
-            font-weight: 600;
-        }
-        .header p {
-            font-size: 13.5px;
-            margin: 1px 0;
-        }
-        .meta-table {
-            width: 100%;
-            margin-bottom: 16px;
-            font-weight: 600;
-        }
-        .meta-table td {
-            vertical-align: top;
-        }
-        .recipient {
-            margin-bottom: 18px;
+            padding: 0;
+            background-color: #f1f5f9;
+            color: #000;
+            font-family: 'Noto Sans Bengali', 'SolaimanLipi', 'Kalpurush', Arial, sans-serif;
+            font-size: 13px;
             line-height: 1.45;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
-        .subject {
-            font-weight: 700;
-            margin-bottom: 14px;
-            text-decoration: underline;
+
+        /* স্ক্রিন প্রিভিউ কন্টেইনার */
+        .page-container {
+            width: 175mm;
+            margin: 20px auto;
+            padding: 12mm;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        .content-para {
-            text-align: justify;
-            text-indent: 35px;
-            margin-bottom: 12px;
-        }
-        table.notice-table {
+
+        /* মূল লেআউট টেবিল যা কোনো টেক্সট ওভারল্যাপ হতে দেবে না */
+        table.main-layout {
             width: 100%;
             border-collapse: collapse;
-            margin: 14px 0 16px 0;
+            table-layout: fixed;
         }
+
+        table.main-layout td {
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .header-title {
+            text-align: center;
+            line-height: 1.35;
+            padding-bottom: 12px;
+        }
+
+        .header-title h3 {
+            font-size: 16px;
+            margin: 0 0 2px 0;
+            font-weight: 700;
+        }
+
+        .header-title h4 {
+            font-size: 14px;
+            margin: 0 0 2px 0;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            font-size: 12px;
+            margin: 1px 0;
+        }
+
+        .ref-date-row {
+            font-weight: 600;
+            padding-bottom: 12px !important;
+        }
+
+        .recipient-box {
+            padding-bottom: 12px !important;
+            line-height: 1.4;
+        }
+
+        .subject-row {
+            font-weight: 700;
+            text-decoration: underline;
+            padding-bottom: 10px !important;
+        }
+
+        .content-para {
+            text-align: justify;
+            text-indent: 28px;
+            line-height: 1.5;
+            padding-bottom: 10px !important;
+        }
+
+        /* বকেয়া ছক */
+        table.notice-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
         table.notice-table th, table.notice-table td {
             border: 1px solid #000;
-            padding: 6px 10px;
-            font-size: 14px;
+            padding: 4px 6px;
+            font-size: 12.5px;
+            word-break: break-word;
         }
+
         table.notice-table th {
             font-weight: 700;
-            background-color: #f2f2f2;
+            background-color: #f1f5f9;
             text-align: center;
         }
+
         .num-cell {
             text-align: right;
             font-variant-numeric: tabular-nums;
         }
 
-        /* প্রেরকের স্বাক্ষর সেকশন: ডান প্রান্তে অবস্থান কিন্তু ভেতরের লেখাগুলো সেন্টারে এলাইন্ড */
-        .signature-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 35px;
-        }
-        .signature-block {
+        /* প্রেরকের স্বাক্ষর সেল */
+        .signature-cell {
             text-align: center;
-            min-width: 250px;
-            line-height: 1.4;
+            line-height: 1.35;
+            padding-top: 15px !important;
         }
 
+        /* প্রিন্ট কন্ট্রোল বার */
         .action-bar {
             position: fixed;
             top: 15px;
@@ -113,127 +142,164 @@
             padding: 8px 12px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+            z-index: 999;
         }
+
         .btn {
-            background-color: #047857;
             color: #fff;
             border: none;
             padding: 8px 16px;
             font-size: 13px;
             border-radius: 6px;
             cursor: pointer;
-            font-family: inherit;
             font-weight: 700;
         }
-        .btn-close {
-            background-color: #64748b;
-        }
+
+        .btn-print { background-color: #047857; }
+        .btn-close { background-color: #64748b; }
+
         @media print {
-            body { padding: 0; }
             .action-bar { display: none !important; }
-            table.notice-table th { background-color: #eee !important; -webkit-print-color-adjust: exact; }
+            html, body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            .page-container {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            table.notice-table th { background-color: #eeeeee !important; }
         }
     </style>
 </head>
 <body>
 
     <div class="action-bar">
-        <button class="btn" onclick="window.print()">🖨️ প্রিন্ট করুন</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ প্রিন্ট / Save as PDF</button>
         <button class="btn btn-close" onclick="window.close()">বন্ধ করুন</button>
     </div>
 
-    <div class="page">
-        <!-- অফিস লেটারহেড -->
-        <div class="header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg"
-                 alt="বাংলাদেশ সরকারের সিলমোহর" class="gov-logo">
-            <h3>{{ setting.govt_title|default:"গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" }}</h3>
-            <h4>{{ setting.office_title|default:"উপ কর কমিশনারের কার্যালয়" }}</h4>
-            <p>{{ setting.circle_line|default:"সার্কেল-১৩ (ফেনী সদর), কর অঞ্চল-নোয়াখালী।" }}</p>
-            <p>{{ setting.office_address|default:"৩৪২/১, ফরিদা কুদ্দুস নিবাস, কুমিল্লা বাসস্ট্যান্ড, ট্রাংক রোড, ফেনী সদর, ফেনী।" }}</p>
-        </div>
-
-        <!-- নথি ও তারিখ -->
-        <table class="meta-table">
+    <div class="page-container">
+        <!-- পুরো পৃষ্ঠার কন্টেন্ট একটি প্রধান টেবিলের মধ্যে সারিবদ্ধ -->
+        <table class="main-layout">
+            <!-- ১. অফিস লেটারহেড -->
             <tr>
-                <td style="text-align: left;">নথি নং: {{ file_no }}</td>
-                <td style="text-align: right;">তারিখ: {{ issue_date }}</td>
+                <td colspan="2" class="header-title">
+                    <h3>{{ setting.govt_title|default:"গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" }}</h3>
+                    <h4>{{ setting.office_title|default:"উপ কর কমিশনারের কার্যালয়" }}</h4>
+                    <p>{{ setting.circle_line|default:"সার্কেল-১৩ (ফেনী সদর), কর অঞ্চল-নোয়াখালী।" }}</p>
+                    <p>{{ setting.office_address|default:"৩৪২/১, ফরিদা কুদ্দুস নিবাস, কুমিল্লা বাসস্ট্যান্ড, ট্রাংক রোড, ফেনী সদর, ফেনী।" }}</p>
+                </td>
+            </tr>
+
+            <!-- ২. নথি ও তারিখ -->
+            <tr>
+                <td class="ref-date-row" style="text-align: left; width: 55%;">নথি নং: {{ file_no }}</td>
+                <td class="ref-date-row" style="text-align: right; width: 45%;">তারিখ: {{ issue_date }}</td>
+            </tr>
+
+            <!-- ৩. প্রাপকের বিবরণ -->
+            <tr>
+                <td colspan="2" class="recipient-box">
+                    প্রাপক:<br>
+                    <strong>জনাব {{ taxpayer.name }}</strong><br>
+                    {{ taxpayer.address_line1 }}<br>
+                    {{ taxpayer.address_line2 }}<br>
+                    {{ taxpayer.address_line3 }}<br>
+                    মোবাইল: {{ taxpayer.phone|default:"—" }}<br>
+                    <strong>টিআইএন: {{ taxpayer.tin }}</strong>
+                </td>
+            </tr>
+
+            <!-- ৪. বিষয় -->
+            <tr>
+                <td colspan="2" class="subject-row">
+                    বিষয়: বকেয়া আয়কর পরিশোধ প্রসঙ্গে।
+                </td>
+            </tr>
+
+            <!-- ৫. সূচনামূলক বক্তব্য -->
+            <tr>
+                <td colspan="2" class="content-para">
+                    উপর্যুক্ত বিষয়ের প্রতি আপনার দৃষ্টি আকর্ষণ করছি। নিম্নে বর্ণিত ছক মোতাবেক আপনার নিকট হতে আয়কর দাবি অদ্যাবধি পরিশোধ করা হয়নি মর্মে নথি দৃষ্টে প্রতীয়মান হয়:-
+                </td>
+            </tr>
+
+            <!-- ৬. বকেয়া ছক -->
+            <tr>
+                <td colspan="2">
+                    <table class="notice-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">করবর্ষ</th>
+                                <th style="width: 25%;">বকেয়া আয়কর (৳)</th>
+                                <th style="width: 25%;">জরিমানা (৳)</th>
+                                <th style="width: 25%;">মোট বকেয়া দাবি (৳)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in arrear_records %}
+                            <tr>
+                                <td style="text-align: center; font-weight: 500;">{{ item.assessment_year }}</td>
+                                <td class="num-cell">{{ item.demand|floatformat:2 }}</td>
+                                <td class="num-cell">{{ item.fine|floatformat:2 }}</td>
+                                <td class="num-cell" style="font-weight: 600;">{{ item.due_amount|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight: 700; background-color: #fafafa;">
+                                <td style="text-align: center;">সর্বমোট</td>
+                                <td class="num-cell">{{ total_demand|floatformat:2 }}</td>
+                                <td class="num-cell">{{ total_fine|floatformat:2 }}</td>
+                                <td class="num-cell">{{ grand_total|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </td>
+            </tr>
+
+            <!-- ৭. পরিশোধের নির্দেশনা -->
+            <tr>
+                <td colspan="2" class="content-para">
+                    উপর্যুক্ত বকেয়া আয়কর ও জরিমানা আগামী <strong>{{ deadline_date }}</strong> এর পূর্বে পরিশোধের অনুরোধ জানাচ্ছি। যদি ইতোমধ্যে বকেয়া কর পরিশোধ করা হয়ে থাকে তাহলে ট্রেজারি চালানের অনুলিপি নিম্নস্বাক্ষরকারীর কার্যালয়ে দাখিল করার জন্য আপনাকে অনুরোধ করা হলো।
+                </td>
+            </tr>
+
+            <!-- ৮. আইনগত সতর্কবার্তা -->
+            <tr>
+                <td colspan="2" class="content-para">
+                    নির্ধারিত সময়ের মধ্যে বকেয়া আয়কর পরিশোধ করা না হলে বকেয়া কর দাবি আদায়ের লক্ষ্যে আয়কর আইন, ২০২৩ এর ২৭৫ ধারা অনুযায়ী সমপরিমাণ জরিমানা আরোপ, ২২১(৩) ধারায় ব্যাংক হিসাব জব্দকরণ, ২২১(৭) ধারা অনুযায়ী গ্যাস, বিদ্যুৎ, পানি বা অন্যান্য সেবার সংযোগ বিচ্ছিন্নকরণ এবং ২২০(১) ধারায় সার্টিফিকেট মামলা দায়েরসহ অন্যান্য আইনানুগ ব্যবস্থা গ্রহণ করা হবে।
+                </td>
+            </tr>
+
+            <!-- ৯. সমাপনী অনুরোধ -->
+            <tr>
+                <td colspan="2" class="content-para">
+                    জাতীয় রাজস্ব আহরণের স্বার্থে আপনার সহযোগিতা একান্ত কাম্য।
+                </td>
+            </tr>
+
+            <!-- ১০. প্রেরকের স্বাক্ষর ও পদবী ব্লক -->
+            <tr>
+                <td style="width: 50%;"></td>
+                <td style="width: 50%;" class="signature-cell">
+                    <br><br>
+                    ({{ setting.officer_name|default:"আব্দুল হক" }})<br>
+                    {{ setting.designation|default:"উপকর কমিশনার" }}<br>
+                    {{ setting.sender_circle|default:"সার্কেল-১৩ (ফেনী সদর)" }}<br>
+                    {{ setting.sender_zone|default:"কর অঞ্চল- নোয়াখালী।" }}<br>
+                    ফোন নম্বর: {{ setting.phone_number|default:"০২৩৩৪৪-৭৩৬০০" }}
+                </td>
             </tr>
         </table>
-
-        <!-- প্রাপকের বিবরণ -->
-        <div class="recipient">
-            প্রাপক:<br>
-            <strong>জনাব {{ taxpayer.name }}</strong><br>
-            {{ taxpayer.address_line1 }}<br>
-            {{ taxpayer.address_line2 }}<br>
-            {{ taxpayer.address_line3 }}<br>
-            মোবাইল: {{ taxpayer.phone|default:"—" }}<br>
-            <strong>টিআইএন: {{ taxpayer.tin }}</strong>
-        </div>
-
-        <div class="subject">
-            বিষয়: বকেয়া আয়কর পরিশোধ প্রসঙ্গে।
-        </div>
-
-        <div class="content-para">
-            উপর্যুক্ত বিষয়ের প্রতি আপনার দৃষ্টি আকর্ষণ করছি। নিম্নে বর্ণিত ছক মোতাবেক আপনার নিকট হতে আয়কর দাবি অদ্যাবধি পরিশোধ করা হয়নি মর্মে নথি দৃষ্টে প্রতীয়মান হয়:-
-        </div>
-
-        <!-- বকেয়া ছক -->
-        <table class="notice-table">
-            <thead>
-                <tr>
-                    <th style="width: 25%;">করবর্ষ</th>
-                    <th style="width: 25%;">বকেয়া আয়কর</th>
-                    <th style="width: 25%;">জরিমানা</th>
-                    <th style="width: 25%;">মোট বকেয়া দাবি</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in arrear_records %}
-                <tr>
-                    <td style="text-align: center; font-weight: 500;">{{ item.assessment_year }}</td>
-                    <td class="num-cell">{{ item.demand|floatformat:2 }}</td>
-                    <td class="num-cell">{{ item.fine|floatformat:2 }}</td>
-                    <td class="num-cell" style="font-weight: 600;">{{ item.due_amount|floatformat:2 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr style="font-weight: 700; background-color: #fafafa;">
-                    <td style="text-align: center;">সর্বমোট</td>
-                    <td class="num-cell">{{ total_demand|floatformat:2 }}</td>
-                    <td class="num-cell">{{ total_fine|floatformat:2 }}</td>
-                    <td class="num-cell">{{ grand_total|floatformat:2 }}</td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <div class="content-para">
-            উপর্যুক্ত বকেয়া আয়কর ও জরিমানা আগামী <strong>{{ deadline_date }}</strong> এর পূর্বে পরিশোধের অনুরোধ জানাচ্ছি। যদি ইতোমধ্যে বকেয়া কর পরিশোধ করা হয়ে থাকে তাহলে ট্রেজারি চালানের (A-Challan) অনুলিপি নিম্নস্বাক্ষরকারীর কার্যালয়ে দাখিল করার জন্য আপনাকে অনুরোধ করা হলো।
-        </div>
-
-        <div class="content-para">
-            নির্ধারিত সময়ের মধ্যে বকেয়া আয়কর পরিশোধ করা না হলে বকেয়া কর দাবি আদায়ের লক্ষ্যে আয়কর আইন, ২০২৩ এর ২৭৫ ধারা অনুযায়ী সমপরিমাণ জরিমানা আরোপ, ২২১(৩) ধারায় ব্যাংক হিসাব জব্দকরণ, ২২১(৭) ধারা অনুযায়ী গ্যাস, বিদ্যুৎ, পানি বা অন্যান্য সেবার সংযোগ বিচ্ছিন্নকরণ এবং ২২০(১) ধারায় সার্টিফিকেট মামলা দায়েরসহ অন্যান্য আইনানুগ ব্যবস্থা গ্রহণ করা হবে।
-        </div>
-
-        <div class="content-para">
-            জাতীয় রাজস্ব আহরণের স্বার্থে আপনার সহযোগিতা একান্ত কাম্য।
-        </div>
-
-        <!-- প্রেরকের পদবী ব্লক (ডান প্রান্তে অবস্থিত কিন্তু লেখাগুলো সেন্টারে) -->
-        <div class="signature-container">
-            <div class="signature-block">
-                <br><br>
-                ({{ setting.officer_name|default:"আব্দুল হক" }})<br>
-                {{ setting.designation|default:"উপকর কমিশনার" }}<br>
-                {{ setting.sender_circle|default:"সার্কেল-১৩ (ফেনী সদর)" }}<br>
-                {{ setting.sender_zone|default:"কর অঞ্চল- নোয়াখালী।" }}<br>
-                ফোন নম্বর: {{ setting.phone_number|default:"০২৩৩৪৪-৭৩৬০০" }}
-            </div>
-        </div>
     </div>
 
 </body>
