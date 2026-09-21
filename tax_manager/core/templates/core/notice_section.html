@@ -64,9 +64,14 @@
                 </h2>
                 <p class="text-xs text-slate-500 mt-1">বকেয়া দাবি ও রিমাইন্ডার নোটিশসমূহ স্বয়ংক্রিয়ভাবে প্রস্তুত ও মনিটরিং করুন</p>
             </div>
-            <a href="{% url 'generate_arrear_notice' %}" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-1.5">
-                <span>➕</span> নতুন বকেয়া নোটিশ তৈরি করুন
-            </a>
+            <div class="flex gap-2">
+      <a href="{% url 'notice_183_create' %}" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition shadow-sm flex items-center gap-1.5">
+          <span>⚖️</span> + ১৮৩(৩) শুনানির নোটিশ
+      </a>
+      <a href="{% url 'generate_arrear_notice' %}" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition shadow-sm flex items-center gap-1.5">
+          <span>📑</span> + নতুন বকেয়া নোটিশ তৈরি করুন
+      </a>
+  </div>
         </div>
 
         <!-- নোটিশ মেট্রিক কার্ডসমূহ -->

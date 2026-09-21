@@ -682,3 +682,87 @@ def print_arrear_notice_view(request, taxpayer_id):
         'setting': notice_setting,
     }
     return render(request, 'core/arrear_notice_print.html', context)
+
+from datetime import date, datetime
+
+# ১. ১৮৩(৩) নোটিশ তৈরির ফর্ম ও সার্চ ভিউ
+import time
+
+# ১. ১৮৩(৩) নোটিশ তৈরির ফর্ম ও সেভ ভিউ
+@login_required(login_url='home')
+def notice_183_create_view(request):
+    if request.method == 'POST':
+        taxpayer_id = request.POST.get('taxpayer_id')
+        tin = request.POST.get('tin', '').strip()
+        assessment_year = request.POST.get('assessment_year', '').strip()
+        issue_date = request.POST.get('issue_date') or str(date.today())
+        hearing_date = request.POST.get('hearing_date')
+        hearing_time = request.POST.get('hearing_time', '').strip()
+
+        taxpayer = None
+        if taxpayer_id:
+            taxpayer = Taxpayer.objects.filter(id=taxpayer_id).first()
+        if not taxpayer and tin:
+            taxpayer = Taxpayer.objects.filter(tin=tin).first()
+
+        if not taxpayer:
+            messages.error(request, f'টিআইএন "{tin}" দিয়ে কোনো করদাতা খুঁজে পাওয়া যায়নি!')
+            return redirect('notice_183_create')
+
+        # UNIQUE constraint এড়াতে ইউনিক রেফারেন্স কি তৈরি (ডাটাবেজের জন্য)
+        timestamp_suffix = int(time.time())
+        unique_ref = f"{taxpayer.tin}-183-{assessment_year}-{timestamp_suffix}"
+
+        # TaxNotice টেবিলে সেভ করা
+        TaxNotice.objects.create(
+            taxpayer=taxpayer,
+            notice_type='SHOW_CAUSE',  # অথবা আপনার মডেলের চয়েস অনুযায়ী
+            reference_no=unique_ref,
+            issue_date=issue_date,
+            due_date=hearing_date,
+            arrear_amount=Decimal('0.00'),
+            is_served=True,
+            notes=f"ধারা ১৮৩(৩) শুনানির নোটিশ | করবর্ষ: {assessment_year} | শুনানির সময়: {hearing_time}"
+        )
+
+        # প্রিন্ট পেজে রিডাইরেক্ট (প্রিন্ট পেজের 'নং:' ঘরে টিআইএন প্রদর্শিত হবে)
+        query_string = f"?ay={assessment_year}&issue={issue_date}&hearing_date={hearing_date}&hearing_time={hearing_time}"
+        return redirect(f"/notices/183/print/{taxpayer.id}/{query_string}")
+
+    return render(request, 'core/notice_183_form.html')
+
+
+# ২. আই.টি-৮৬ (২০২৩) অফিসিয়াল নোটিশ প্রিন্ট ভিউ
+@login_required(login_url='home')
+def notice_183_print_view(request, taxpayer_id):
+    taxpayer = get_object_or_404(Taxpayer, id=taxpayer_id)
+
+    assessment_year = request.GET.get('ay', '')
+    req_issue = request.GET.get('issue')
+    req_hearing_date = request.GET.get('hearing_date')
+    hearing_time = request.GET.get('hearing_time', '')
+
+    today = datetime.strptime(req_issue, '%Y-%m-%d').date() if req_issue else date.today()
+    hearing_dt = datetime.strptime(req_hearing_date, '%Y-%m-%d').date() if req_hearing_date else date.today()
+
+    issue_date_bn = to_bengali_digits(today.strftime('%d-%m-%Y')) + ' খ্রি.'
+    hearing_date_bn = to_bengali_digits(hearing_dt.strftime('%d-%m-%Y')) + ' খ্রি.'
+    hearing_time_bn = to_bengali_digits(hearing_time)
+    tin_bn = to_bengali_digits(taxpayer.tin)
+    ay_bn = to_bengali_digits(assessment_year)
+    phone_bn = to_bengali_digits(taxpayer.phone or '')
+
+    # অফিস সেটিংস থেকে কর্মকর্তা ও অফিসের তথ্য নেওয়া
+    notice_setting = NoticeSetting.objects.filter(is_active=True).first()
+
+    context = {
+        'taxpayer': taxpayer,
+        'tin_bn': tin_bn,
+        'ay_bn': ay_bn,
+        'phone_bn': phone_bn,
+        'issue_date_bn': issue_date_bn,
+        'hearing_date_bn': hearing_date_bn,
+        'hearing_time_bn': hearing_time_bn,
+        'setting': notice_setting,
+    }
+    return render(request, 'core/notice_183_print.html', context)

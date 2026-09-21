@@ -44,5 +44,7 @@ urlpatterns = [
     path('api/search-taxpayer/', views.search_taxpayer_by_tin, name='search_taxpayer_by_tin'),
     path('notices/arrear/search/', views.generate_arrear_notice_view, name='generate_arrear_notice'),
     path('notices/arrear/print/<int:taxpayer_id>/', views.print_arrear_notice_view, name='print_arrear_notice'),
+    path('notices/183/create/', views.notice_183_create_view, name='notice_183_create'),
+    path('notices/183/print/<int:taxpayer_id>/', views.notice_183_print_view, name='notice_183_print'),
 
 ]
