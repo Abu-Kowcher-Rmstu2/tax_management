@@ -237,3 +237,49 @@ class TaxNoticeAdmin(admin.ModelAdmin):
 class NoticeSettingAdmin(admin.ModelAdmin):
     list_display = ('officer_name', 'designation', 'sender_circle', 'phone_number', 'is_active')
     list_editable = ('is_active',)
+
+
+
+
+from .models import AdvanceTaxRegister
+
+@admin.action(description="Export Selected to Excel (অগ্রিম কর এক্সেল ডাউনলোড)")
+def export_advance_tax_to_excel(modeladmin, request, queryset):
+    headers = [
+        "TIN", "Taxpayer Name", "Fiscal Year", "Installment",
+        "Payment Date", "Paid Amount (Tk)", "Challan No", "Challan Date", "Remarks"
+    ]
+    rows = []
+    for item in queryset.select_related('taxpayer'):
+        rows.append([
+            item.taxpayer.tin,
+            item.taxpayer.name,
+            item.fiscal_year,
+            item.get_installment_display(),
+            item.payment_date.strftime("%d-%m-%Y") if item.payment_date else '',
+            float(item.paid_amount or 0.0),
+            item.challan_no,
+            item.challan_date.strftime("%d-%m-%Y") if item.challan_date else '',
+            item.remarks or ''
+        ])
+    return create_excel_response("Advance_Tax_Register_Export", headers, rows)
+
+
+@admin.register(AdvanceTaxRegister)
+class AdvanceTaxRegisterAdmin(admin.ModelAdmin):
+    list_display = (
+        'get_tin', 'get_name', 'fiscal_year', 'installment',
+        'paid_amount', 'challan_no', 'challan_date', 'payment_date'
+    )
+    list_filter = ('installment', 'fiscal_year', 'payment_date')
+    search_fields = ('taxpayer__tin', 'taxpayer__name', 'challan_no')
+    autocomplete_fields = ['taxpayer']
+    actions = [export_advance_tax_to_excel]
+
+    @admin.display(description='টিআইএন (TIN)', ordering='taxpayer__tin')
+    def get_tin(self, obj):
+        return obj.taxpayer.tin
+
+    @admin.display(description='করদাতার নাম', ordering='taxpayer__name')
+    def get_name(self, obj):
+        return obj.taxpayer.name

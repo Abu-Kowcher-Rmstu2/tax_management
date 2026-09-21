@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Sum
 from .models import Taxpayer, TaxTransaction, TaxNotice, TaxAssessment
+from .models import AdvanceTaxRegister
 
 def home_view(request):
     if request.user.is_authenticated:
@@ -61,13 +62,93 @@ def dashboard_view(request):
     return render(request, 'core/dashboard.html', context)
 
 
+    from .models import AdvanceTaxRegister
+
 @login_required(login_url='home')
 def advance_register_view(request):
-    """অগ্রিম কর রেজিস্টার"""
-    records = TaxTransaction.objects.filter(transaction_type='ADVANCE').select_related('taxpayer').order_by('-payment_date')
-    total_amount = records.aggregate(total=Sum('amount'))['total'] or 0.00
-    return render(request, 'core/register_advance.html', {'records': records, 'total_amount': total_amount})
+    """অগ্রিম কর রেজিস্টার তালিকা ও সারসংক্ষেপ ভিউ"""
+    tin_query = request.GET.get('tin', '').strip()
+    installment_query = request.GET.get('installment', '').strip()
+    start_date = request.GET.get('start_date', '').strip()
+    end_date = request.GET.get('end_date', '').strip()
 
+    records = AdvanceTaxRegister.objects.select_related('taxpayer').all().order_by('-payment_date')
+
+    if tin_query:
+        records = records.filter(taxpayer__tin__icontains=tin_query)
+    if installment_query:
+        records = records.filter(installment=installment_query)
+    if start_date:
+        records = records.filter(payment_date__gte=start_date)
+    if end_date:
+        records = records.filter(payment_date__lte=end_date)
+
+    total_amount = records.aggregate(total=Sum('paid_amount'))['total'] or Decimal('0.00')
+
+    context = {
+        'records': records,
+        'total_amount': total_amount,
+        'total_count': records.count(),
+        'tin_query': tin_query,
+        'installment_query': installment_query,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+    return render(request, 'core/register_advance.html', context)
+
+
+@login_required(login_url='home')
+def add_advance_tax_view(request):
+    """নতুন অগ্রিম কর এন্ট্রি ভিউ"""
+    if request.method == 'POST':
+        taxpayer_id = request.POST.get('taxpayer_id')
+        tin = request.POST.get('tin', '').strip()
+        fiscal_year = request.POST.get('fiscal_year', '2026-2027').strip()
+        installment = request.POST.get('installment')
+        payment_date = request.POST.get('payment_date')
+        paid_amount = Decimal(request.POST.get('paid_amount') or '0.00')
+        challan_no = request.POST.get('challan_no', '').strip()
+        challan_date = request.POST.get('challan_date')
+        remarks = request.POST.get('remarks', '').strip()
+
+        taxpayer = None
+        if taxpayer_id:
+            taxpayer = Taxpayer.objects.filter(id=taxpayer_id).first()
+        if not taxpayer and tin:
+            taxpayer = Taxpayer.objects.filter(tin=tin).first()
+
+        if not taxpayer:
+            messages.error(request, f'টিআইএন "{tin}" দিয়ে কোনো করদাতা ডাটাবেজে পাওয়া যায়নি!')
+            return render(request, 'core/advance_tax_form.html')
+
+        # ১. অগ্রিম কর রেজিস্টারে সংরক্ষণ
+        AdvanceTaxRegister.objects.create(
+            taxpayer=taxpayer,
+            fiscal_year=fiscal_year,
+            installment=installment,
+            payment_date=payment_date,
+            paid_amount=paid_amount,
+            challan_no=challan_no,
+            challan_date=challan_date,
+            remarks=remarks
+        )
+
+        # ২. ড্যাশবোর্ডের মোট কালেকশনের সাথে সিঙ্ক রাখতে TaxTransaction এ এন্ট্রি
+        TaxTransaction.objects.create(
+            taxpayer=taxpayer,
+            fiscal_year=fiscal_year,
+            transaction_type='ADVANCE',
+            challan_no=challan_no,
+            challan_date=challan_date,
+            payment_date=payment_date,
+            amount=paid_amount,
+            remarks=f"অগ্রিম কর ({installment}) - {remarks}"
+        )
+
+        messages.success(request, f'করদাতা {taxpayer.name}-এর অগ্রিম কর (৳ {paid_amount}) সফলভাবে সংরক্ষণ করা হয়েছে।')
+        return redirect('advance_register')
+
+    return render(request, 'core/advance_tax_form.html')
 
 from decimal import Decimal
 from django.db.models import Sum

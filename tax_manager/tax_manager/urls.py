@@ -34,6 +34,7 @@ urlpatterns = [
     path('collection/new/', views.add_collection_view, name='add_collection'),
     path('collections/view/', views.view_collections_view, name='view_collections'),
     path('registers/advance/', views.advance_register_view, name='advance_register'),
+    path('registers/advance/add/', views.add_advance_tax_view, name='add_advance_tax'),
     path('registers/arrear/', views.arrear_register_view, name='arrear_register'),
     path('notices/', views.notice_section_view, name='notice_section'),
     path('api/taxpayers/search/', views.search_taxpayer_api, name='search_taxpayer_api'),
@@ -42,6 +43,6 @@ urlpatterns = [
     path('arrears/pay/<int:arrear_id>/', views.collect_arrear_payment, name='collect_arrear_payment'),
     path('api/search-taxpayer/', views.search_taxpayer_by_tin, name='search_taxpayer_by_tin'),
     path('notices/arrear/search/', views.generate_arrear_notice_view, name='generate_arrear_notice'),
-path('notices/arrear/print/<int:taxpayer_id>/', views.print_arrear_notice_view, name='print_arrear_notice'),
+    path('notices/arrear/print/<int:taxpayer_id>/', views.print_arrear_notice_view, name='print_arrear_notice'),
 
 ]

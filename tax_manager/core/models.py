@@ -159,3 +159,32 @@ class NoticeSetting(models.Model):
 
     def __str__(self):
         return f"{self.officer_name} - {self.designation} ({self.sender_circle})"
+
+
+
+
+class AdvanceTaxRegister(models.Model):
+    INSTALLMENT_CHOICES = [
+        ('1ST', '1st Installment (১ম কিস্তি - ১৫ সেপ্টেম্বর)'),
+        ('2ND', '2nd Installment (২য় কিস্তি - ১৫ ডিসেম্বর)'),
+        ('3RD', '3rd Installment (৩য় কিস্তি - ১৫ মার্চ)'),
+        ('4TH', '4th Installment (৪র্থ কিস্তি - ১৫ জুন)'),
+    ]
+
+    taxpayer = models.ForeignKey(Taxpayer, on_delete=models.CASCADE, related_name="advance_taxes", verbose_name="করদাতা")
+    fiscal_year = models.CharField(max_length=9, default="2027-2028", verbose_name="করবর্ষ / অর্থবছর")
+    installment = models.CharField(max_length=5, choices=INSTALLMENT_CHOICES, verbose_name="কিস্তি (Installment)")
+    payment_date = models.DateField(default=timezone.now, verbose_name="পরিশোধের তারিখ")
+    paid_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="পরিশোধিত অগ্রিম কর (৳)")
+    challan_no = models.CharField(max_length=60, verbose_name="চালান / ট্রানজেকশন নম্বর")
+    challan_date = models.DateField(verbose_name="চালানের তারিখ")
+    remarks = models.TextField(blank=True, verbose_name="মন্তব্য")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "অগ্রিম কর রেজিস্টার"
+        verbose_name_plural = "অগ্রিম কর রেজিস্টারসমূহ"
+        ordering = ['-payment_date', '-created_at']
+
+    def __str__(self):
+        return f"{self.taxpayer.name} ({self.taxpayer.tin}) - {self.get_installment_display()} - ৳{self.paid_amount}"
