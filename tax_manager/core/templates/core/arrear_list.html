@@ -57,16 +57,24 @@
             {% endfor %}
         {% endif %}
 
-        <!-- সময়কাল ও টিআইএন ফিল্টারিং কার্ড -->
+        <!-- নিষ্পত্তির তারিখ, ধরন ও টিআইএন ফিল্টারিং কার্ড -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <form method="GET" action="{% url 'arrear_list' %}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
+            <form method="GET" action="{% url 'arrear_list' %}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">শুরুর তারিখ (From Date)</label>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">নিষ্পত্তির শুরুর তারিখ</label>
                     <input type="date" name="start_date" value="{{ start_date }}" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">শেষ তারিখ (To Date)</label>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">নিষ্পত্তির শেষ তারিখ</label>
                     <input type="date" name="end_date" value="{{ end_date }}" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">বকেয়ার ধরন</label>
+                    <select name="arrear_type" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+                        <option value="">-- সকল ধরন --</option>
+                        <option value="UNDISPUTED" {% if arrear_type == 'UNDISPUTED' %}selected{% endif %}>অবিসংবাদিত (Undisputed)</option>
+                        <option value="DISPUTED" {% if arrear_type == 'DISPUTED' %}selected{% endif %}>বিসংবাদিত (Disputed)</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">টিআইএন (TIN)</label>
@@ -110,9 +118,12 @@
                     <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                         <span>📕</span> বকেয়া রেজিস্টার বিবরণী
                     </h2>
-                    {% if start_date or end_date %}
+                    {% if start_date or end_date or arrear_type or tin_query %}
                         <p class="text-[11px] text-slate-500 mt-0.5">
-                            সময়কাল: <strong>{{ start_date|default:"শুরু হতে" }}</strong> থেকে <strong>{{ end_date|default:"বর্তমান" }}</strong>
+                            ফিল্টার সক্রিয়:
+                            {% if start_date or end_date %}নিষ্পত্তির তারিখ: <strong>{{ start_date|default:"শুরু" }}</strong> হতে <strong>{{ end_date|default:"বর্তমান" }}</strong>;{% endif %}
+                            {% if arrear_type %}ধরন: <strong>{{ arrear_type }}</strong>;{% endif %}
+                            {% if tin_query %}TIN: <strong>{{ tin_query }}</strong>{% endif %}
                         </p>
                     {% endif %}
                 </div>
@@ -125,9 +136,9 @@
                 <table class="w-full text-left text-xs text-slate-600">
                     <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
                         <tr>
-                            <th class="p-3">এন্ট্রির তারিখ</th>
                             <th class="p-3">করদাতার নাম ও TIN</th>
                             <th class="p-3 text-center">করবর্ষ</th>
+                            <th class="p-3 text-center">ধরন ও নিষ্পত্তির তথ্য</th>
                             <th class="p-3 text-right">মূল দাবি (৳)</th>
                             <th class="p-3 text-right">জরিমানা (৳)</th>
                             <th class="p-3 text-right font-bold text-slate-900">মোট বকেয়া (৳)</th>
@@ -139,14 +150,26 @@
                     <tbody class="divide-y divide-slate-100">
                         {% for item in arrears %}
                         <tr class="hover:bg-slate-50 transition">
-                            <td class="p-3 font-mono text-slate-500">
-                                {{ item.created_at|date:"d M, Y" }}
-                            </td>
                             <td class="p-3">
                                 <div class="font-bold text-slate-800">{{ item.taxpayer.name }}</div>
                                 <div class="text-[11px] font-mono text-slate-400">TIN: {{ item.taxpayer.tin }}</div>
                             </td>
                             <td class="p-3 text-center font-medium">{{ item.assessment_year }}</td>
+                            <td class="p-3 text-center">
+                                <div>
+                                    {% if item.arrear_type == 'DISPUTED' %}
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">Disputed</span>
+                                    {% else %}
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Undisputed</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1">
+                                    {% if item.disposal_section %}ধারা: {{ item.disposal_section }}{% endif %}
+                                </div>
+                                {% if item.disposal_date %}
+                                    <div class="text-[10px] text-slate-400 font-mono">নিষ্পত্তি: {{ item.disposal_date|date:"d M, Y" }}</div>
+                                {% endif %}
+                            </td>
                             <td class="p-3 text-right">{{ item.demand|floatformat:2 }}</td>
                             <td class="p-3 text-right">{{ item.fine|floatformat:2 }}</td>
                             <td class="p-3 text-right font-bold text-slate-900">{{ item.total_arrear|floatformat:2 }}</td>
@@ -170,7 +193,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="9" class="p-6 text-center text-slate-400">উক্ত সময়সীমার মধ্যে কোনো বকেয়ার রেকর্ড পাওয়া যায়নি।</td>
+                            <td colspan="9" class="p-6 text-center text-slate-400">উক্ত ফিল্টারিং শর্তানুযায়ী কোনো বকেয়ার রেকর্ড পাওয়া যায়নি।</td>
                         </tr>
                         {% endfor %}
                     </tbody>

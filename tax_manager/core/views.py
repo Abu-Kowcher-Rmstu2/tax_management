@@ -74,7 +74,53 @@ from django.db.models import Sum
 
 @login_required(login_url='home')
 def arrear_register_view(request):
-    """বকেয়া কর রেজিস্টার ভিউ (তালিকা ও সার্চ)"""
+    """বকেয়া কর রেজিস্টার এন্ট্রি ও সেভ ভিউ"""
+    if request.method == 'POST':
+        taxpayer_id = request.POST.get('taxpayer_id')
+        tin = request.POST.get('tin', '').strip()
+        assessment_year = request.POST.get('assessment_year', '').strip()
+        arrear_type = request.POST.get('arrear_type', 'UNDISPUTED')
+        disposal_section = request.POST.get('disposal_section', '').strip()
+        disposal_date = request.POST.get('disposal_date') or None
+
+        demand = Decimal(request.POST.get('demand') or '0.00')
+        fine = Decimal(request.POST.get('fine') or '0.00')
+        collection = Decimal(request.POST.get('collection') or '0.00')
+
+        # করদাতা খোঁজা: আইডি অথবা টিআইএন দিয়ে
+        taxpayer = None
+        if taxpayer_id:
+            taxpayer = Taxpayer.objects.filter(id=taxpayer_id).first()
+        if not taxpayer and tin:
+            taxpayer = Taxpayer.objects.filter(tin=tin).first()
+
+        if not taxpayer:
+            messages.error(request, f'টিআইএন "{tin}" দিয়ে কোনো করদাতা পাওয়া যায়নি! আগে করদাতা নিবন্ধন করুন বা টিআইএন যাচাই করুন।')
+            return redirect('arrear_register')
+
+        if not assessment_year:
+            messages.error(request, 'করবর্ষ অবশ্যই পূরণ করতে হবে!')
+            return redirect('arrear_register')
+
+        # ডাটাবেজে সংরক্ষণ বা আপডেট
+        arrear, created = ArrearRegister.objects.update_or_create(
+            taxpayer=taxpayer,
+            assessment_year=assessment_year,
+            defaults={
+                'arrear_type': arrear_type,
+                'disposal_section': disposal_section,
+                'disposal_date': disposal_date,
+                'demand': demand,
+                'fine': fine,
+                'collection': collection,
+            }
+        )
+
+        status_msg = "নতুন বকেয়া তৈরি" if created else "বকেয়া তথ্য হালনাগাদ"
+        messages.success(request, f'করদাতা {taxpayer.name}-এর {assessment_year} করবর্ষের {status_msg} সফলভাবে সম্পন্ন হয়েছে।')
+        return redirect('arrear_list')
+
+    # GET রিকোয়েস্টের ফিল্টারিং ও হিসেব
     tin_query = request.GET.get('tin', '').strip()
     year_query = request.GET.get('year', '').strip()
 
@@ -85,7 +131,6 @@ def arrear_register_view(request):
     if year_query:
         records = records.filter(assessment_year__icontains=year_query)
 
-    # সারসংক্ষেপ হিসেব
     total_arrear_demand = records.aggregate(total=Sum('total_arrear'))['total'] or Decimal('0.00')
     total_collected = records.aggregate(total=Sum('collection'))['total'] or Decimal('0.00')
     total_due = records.aggregate(total=Sum('due_amount'))['total'] or Decimal('0.00')
@@ -100,7 +145,6 @@ def arrear_register_view(request):
         'total_count': records.count(),
     }
     return render(request, 'core/arrear_form.html', context)
-
 
 @login_required(login_url='home')
 def notice_section_view(request):
@@ -349,13 +393,20 @@ def search_taxpayer_by_tin(request):
     return JsonResponse({'success': False, 'message': 'করদাতা পাওয়া যায়নি'})
 
 # 2. Add / Entry Arrear Form
+
+# 2. Add / Entry Arrear Form
+@login_required(login_url='home')
 def add_arrear(request):
     if request.method == 'POST':
         taxpayer_id = request.POST.get('taxpayer_id')
-        assessment_year = request.POST.get('assessment_year')
-        demand = float(request.POST.get('demand') or 0.0)
-        fine = float(request.POST.get('fine') or 0.0)
-        collection = float(request.POST.get('collection') or 0.0)
+        assessment_year = request.POST.get('assessment_year', '').strip()
+        arrear_type = request.POST.get('arrear_type', 'UNDISPUTED')
+        disposal_section = request.POST.get('disposal_section', '').strip()
+        disposal_date = request.POST.get('disposal_date') or None
+
+        demand = Decimal(request.POST.get('demand') or '0.00')
+        fine = Decimal(request.POST.get('fine') or '0.00')
+        collection = Decimal(request.POST.get('collection') or '0.00')
 
         taxpayer = get_object_or_404(Taxpayer, id=taxpayer_id)
 
@@ -363,6 +414,9 @@ def add_arrear(request):
             taxpayer=taxpayer,
             assessment_year=assessment_year,
             defaults={
+                'arrear_type': arrear_type,
+                'disposal_section': disposal_section,
+                'disposal_date': disposal_date,
                 'demand': demand,
                 'fine': fine,
                 'collection': collection,
@@ -388,10 +442,12 @@ def collect_arrear_payment(request, arrear_id):
     from datetime import datetime
 
 # 4. Arrear List View with Date Duration Filtering
+# 4. Arrear List View with Disposal Date Range, Type & TIN Filtering
 @login_required(login_url='home')
 def arrear_list(request):
     start_date = request.GET.get('start_date', '').strip()
     end_date = request.GET.get('end_date', '').strip()
+    arrear_type = request.GET.get('arrear_type', '').strip()
     tin_query = request.GET.get('tin', '').strip()
 
     arrears = ArrearRegister.objects.select_related('taxpayer').all().order_by('-created_at')
@@ -408,11 +464,17 @@ def arrear_list(request):
             item.collection = total_paid
             item.save()  # due_amount স্বয়ংক্রিয়ভাবে আপডেট হবে
 
-    # ফিল্টারিং অপশন
+    # নিষ্পত্তির তারিখ (Disposal Date) রেঞ্জ ফিল্টারিং
     if start_date:
-        arrears = arrears.filter(created_at__date__gte=start_date)
+        arrears = arrears.filter(disposal_date__gte=start_date)
     if end_date:
-        arrears = arrears.filter(created_at__date__lte=end_date)
+        arrears = arrears.filter(disposal_date__lte=end_date)
+
+    # বকেয়ার ধরন ফিল্টার (UNDISPUTED / DISPUTED)
+    if arrear_type:
+        arrears = arrears.filter(arrear_type=arrear_type)
+
+    # টিআইএন (TIN) অনুসন্ধান
     if tin_query:
         arrears = arrears.filter(taxpayer__tin__icontains=tin_query)
 
@@ -425,6 +487,7 @@ def arrear_list(request):
         'arrears': arrears,
         'start_date': start_date,
         'end_date': end_date,
+        'arrear_type': arrear_type,
         'tin_query': tin_query,
         'total_demand': total_demand,
         'total_collection': total_collection,
@@ -432,8 +495,6 @@ def arrear_list(request):
         'total_count': arrears.count(),
     }
     return render(request, 'core/arrear_list.html', context)
-
-
 
 
 

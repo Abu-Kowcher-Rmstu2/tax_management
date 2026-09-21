@@ -4,15 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>বকেয়া কর রেজিস্টার | কর অঞ্চল-নোয়াখালী</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Hind Siliguri -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Hind Siliguri', sans-serif; background-color: #f8fafc; }
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f8fafc;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-    <!-- হেডার বার -->
+    <!-- হেডার ও নেভিগেশন বার -->
     <header class="bg-emerald-800 text-white shadow-md border-b-4 border-amber-500 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -25,7 +32,7 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <span class="text-xs bg-emerald-900/80 px-3 py-1.5 rounded-md border border-emerald-700 text-emerald-100">
-                        কর্মকর্তা: <strong>{{ request.user.username }}</strong>
+                        কর্মকর্তা: <strong>{{ request.user.username|default:"circle13" }}</strong>
                     </span>
                     <a href="{% url 'logout' %}" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1.5 rounded-md font-medium transition shadow-sm">লগআউট</a>
                 </div>
@@ -39,129 +46,201 @@
                 <a href="{% url 'add_collection' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">+ কর আদায়</a>
                 <a href="{% url 'view_collections' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">আদায় বিবরণী</a>
                 <a href="{% url 'advance_register' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">অগ্রিম কর রেজিস্টার</a>
-                <a href="{% url 'arrear_register' %}" class="px-3 py-1 rounded-md bg-emerald-900 text-amber-300">বকেয়া কর রেজিস্টার</a>
+                <a href="{% url 'arrear_register' %}" class="px-3 py-1 rounded-md bg-emerald-900 text-amber-300 font-bold">বকেয়া কর রেজিস্টার</a>
                 <a href="{% url 'notice_section' %}" class="px-3 py-1 rounded-md hover:bg-emerald-700 transition text-emerald-100">নোটিশ শাখা</a>
             </div>
         </div>
     </header>
 
-    <!-- মূল কনটেন্ট -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="max-w-4xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="bg-rose-700 text-white px-6 py-4 flex justify-between items-center">
-                <h2 class="text-base font-bold flex items-center gap-2">
-                    <span>📕</span> বকেয়া কর রেজিস্টার এন্ট্রি ফরম (Arrear Tax Register)
-                </h2>
-                <a href="{% url 'dashboard' %}" class="text-xs bg-rose-800 hover:bg-rose-900 px-3 py-1 rounded transition text-rose-100">← ড্যাশবোর্ডে ফিরুন</a>
+    <!-- মূল কনটেন্ট এরিয়া -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-4 text-sm rounded-xl border {% if message.tags == 'error' %}bg-rose-50 text-rose-800 border-rose-200{% else %}bg-emerald-50 text-emerald-800 border-emerald-200{% endif %} shadow-sm flex items-center gap-2">
+                    <span>🔔</span> {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- বকেয়া রেজিস্টার এন্ট্রি কার্ড -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-800 to-teal-700 px-6 py-4 text-white flex justify-between items-center">
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold flex items-center gap-2">
+                        <span>📑</span> বকেয়া কর নির্ধারণ ও হিসাব এন্ট্রি
+                    </h2>
+                    <p class="text-xs text-emerald-100 mt-0.5">বকেয়া করের তথ্য, ধারা ও আদায়ের হিসাব হালনাগাদ করুন</p>
+                </div>
+                <a href="{% url 'dashboard' %}" class="text-xs bg-emerald-900/60 hover:bg-emerald-900 border border-emerald-600/50 px-3 py-1.5 rounded-lg transition">
+                    ← ড্যাশবোর্ড
+                </a>
             </div>
 
-            <form method="POST" action="{% url 'add_arrear' %}" class="p-6 space-y-6">
-                {% csrf_token %}
 
-                <!-- TIN Search Box -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">করদাতা নির্বাচন ও যাচাই</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form method="POST" action="{% url 'arrear_register' %}" class="p-6 space-y-6">
+                  {% csrf_token %}
+
+                <!-- করদাতা নির্বাচন ও যাচাই ব্লক -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <span>🔍</span> করদাতা নির্বাচন ও যাচাই
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">করদাতার টিআইএন (TIN)</label>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">করদাতার টিআইএন (TIN) <span class="text-rose-500">*</span></label>
                             <div class="flex gap-2">
-                                <input type="text" id="tin_input" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="১২ ডিজিটের TIN লিখুন">
-                                <button type="button" onclick="searchTaxpayer()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-4 py-2 rounded-lg font-medium transition whitespace-nowrap">যাচাই করুন</button>
+                                <input type="text" name="tin" id="tin_input" value="{{ taxpayer.tin|default:'' }}" placeholder="১২ ডিজিটের TIN লিখুন" class="flex-grow text-sm font-mono border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition shadow-sm" required>
+                                <button type="button" id="verify_tin_btn" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-sm whitespace-nowrap flex items-center gap-1">
+                                    <span>✓</span> যাচাই করুন
+                                </button>
                             </div>
-                            <p id="tin_error" class="text-xs text-rose-600 hidden mt-1">করদাতা ডাটাবেজে পাওয়া যায়নি!</p>
                         </div>
-
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">করদাতার নাম</label>
-                            <input type="text" id="taxpayer_name" class="w-full text-sm border border-slate-200 bg-slate-100 text-slate-700 rounded-lg px-3 py-2 cursor-not-allowed font-medium" readonly placeholder="TIN যাচাই করলে নাম প্রদর্শিত হবে">
-                            <input type="hidden" name="taxpayer_id" id="taxpayer_id" required>
+                            <input type="text" id="taxpayer_name" value="{{ taxpayer.name|default:'' }}" class="w-full text-sm bg-slate-100 border border-slate-300 rounded-lg px-3.5 py-2.5 text-slate-700 font-medium cursor-not-allowed shadow-inner" readonly placeholder="যাচাইয়ের পর নাম প্রদর্শিত হবে">
+                            <input type="hidden" name="taxpayer_id" id="taxpayer_id" value="{{ taxpayer.id|default:'' }}">
                         </div>
                     </div>
                 </div>
 
-                <!-- Demand & Collection Data Fields -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- করবর্ষ, বকেয়ার ধরন, নিষ্পত্তির ধারা ও নিষ্পত্তির তারিখ -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1.5">করবর্ষ (Assessment Year) <span class="text-rose-500">*</span></label>
+        <input type="text" name="assessment_year" placeholder="যেমন: 2023-2024" class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition shadow-sm" required>
+    </div>
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1.5">বকেয়ার ধরন (Arrear Type)</label>
+        <select name="arrear_type" class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white transition shadow-sm">
+            <option value="UNDISPUTED">(Undisputed)</option>
+            <option value="DISPUTED"> (Disputed)</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1.5">নিষ্পত্তির ধারা (Disposal Section)</label>
+        <input type="text" name="disposal_section" placeholder="যেমন: ধারা ২৭৫, ২২১(৩)" class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition shadow-sm">
+    </div>
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1.5">নিষ্পত্তির তারিখ (Disposal Date)</label>
+        <input type="date" name="disposal_date" class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition shadow-sm">
+    </div>
+</div>
+
+                <!-- কর দাবি ও জরিমানা ইনপুট -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">করবর্ষ (Assessment Year)</label>
-                        <input type="text" name="assessment_year" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="যেমন: 2023-2024" required>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">মূল কর দাবি (Demand ৳) <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-bold">৳</span>
+                            <input type="number" step="0.01" name="demand" id="demand_input" value="0.00" class="w-full text-sm pl-8 pr-3.5 py-2.5 border border-slate-300 rounded-lg font-mono font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition shadow-sm" required>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">মূল কর দাবি (Demand ৳)</label>
-                        <input type="number" step="0.01" name="demand" id="demand" value="0.00" class="calc-trigger w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">জরিমানা/সুদ (Fine ৳)</label>
-                        <input type="number" step="0.01" name="fine" id="fine" value="0.00" class="calc-trigger w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">জরিমানা/সুদ (Fine ৳) <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-bold">৳</span>
+                            <input type="number" step="0.01" name="fine" id="fine_input" value="0.00" class="w-full text-sm pl-8 pr-3.5 py-2.5 border border-slate-300 rounded-lg font-mono font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition shadow-sm" required>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-amber-50/50 p-4 rounded-lg border border-amber-200">
+                <!-- লাইভ হিসাব ও ব্যালেন্স প্রিভিউ কার্ড -->
+                <div class="bg-amber-50/70 p-5 rounded-xl border border-amber-200/80 shadow-inner grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">মোট বকেয়া দাবি (Total Arrear ৳)</label>
-                        <input type="number" step="0.01" id="total_arrear" value="0.00" readonly class="w-full text-sm border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 font-bold text-slate-800">
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">মোট বকেয়া দাবি (Total Arrear ৳)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 font-bold">৳</span>
+                            <input type="text" id="total_arrear_display" value="0.00" class="w-full text-sm font-bold pl-8 pr-3 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 font-mono cursor-not-allowed shadow-sm" readonly>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-emerald-800 mb-1">আদায় (Collection ৳)</label>
-                        <input type="number" step="0.01" name="collection" id="collection" value="0.00" class="calc-trigger w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold text-emerald-700">
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">আদায় (Collection ৳)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-bold">৳</span>
+                            <input type="number" step="0.01" name="collection" id="collection_input" value="0.00" class="w-full text-sm pl-8 pr-3.5 py-2.5 border border-slate-300 rounded-lg font-mono font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition bg-white shadow-sm">
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-rose-700 mb-1">অবশিষ্ট বকেয়া (Due Amount ৳)</label>
-                        <input type="number" step="0.01" id="due_amount" value="0.00" readonly class="w-full text-sm border border-rose-200 bg-rose-50 rounded-lg px-3 py-2 font-bold text-rose-700">
+                        <label class="block text-xs font-bold text-rose-700 mb-1.5">অবশিষ্ট বকেয়া (Due Amount ৳)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-rose-500 font-bold">৳</span>
+                            <input type="text" id="due_amount_display" value="0.00" class="w-full text-sm font-bold pl-8 pr-3 py-2.5 bg-rose-50 border border-rose-300 rounded-lg text-rose-700 font-mono cursor-not-allowed shadow-sm" readonly>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
-                    <a href="{% url 'dashboard' %}" class="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-50 transition">বাতিল</a>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition">সংরক্ষণ করুন</button>
+                <!-- অ্যাকশন বাটনসমূহ -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                    <a href="{% url 'dashboard' %}" class="px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition border border-slate-300 shadow-sm">
+                        বাতিল
+                    </a>
+                    <button type="submit" class="px-7 py-2.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-lg transition shadow-md flex items-center gap-1.5">
+                        <span>💾</span> সংরক্ষণ করুন
+                    </button>
                 </div>
             </form>
         </div>
     </main>
 
     <!-- ফুটার -->
-    <footer class="bg-slate-100 border-t border-slate-200 py-3 text-center text-xs text-slate-600">
-        <p>© 2026 কর অঞ্চল-নোয়াখালী | রাজস্ব প্রশাসন ও অভ্যন্তরীণ রেজিস্টার সিস্টেম</p>
+    <footer class="bg-slate-100 border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        © 2026 কর অঞ্চল-নোয়াখালী | ডিজিটাল ট্যাক্স ম্যানেজমেন্ট প্ল্যাটফর্ম
     </footer>
 
+    <!-- লাইভ ক্যালকুলেশন স্ক্রিপ্ট -->
     <script>
-    function searchTaxpayer() {
-        const tin = document.getElementById('tin_input').value.trim();
-        const errorElem = document.getElementById('tin_error');
-        if (!tin) return;
+        const demandInput = document.getElementById('demand_input');
+        const fineInput = document.getElementById('fine_input');
+        const collectionInput = document.getElementById('collection_input');
+        const totalDisplay = document.getElementById('total_arrear_display');
+        const dueDisplay = document.getElementById('due_amount_display');
 
-        fetch(`/api/search-taxpayer/?tin=${encodeURIComponent(tin)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('taxpayer_name').value = data.name;
-                    document.getElementById('taxpayer_id').value = data.taxpayer_id;
-                    errorElem.classList.add('hidden');
-                } else {
-                    document.getElementById('taxpayer_name').value = '';
-                    document.getElementById('taxpayer_id').value = '';
-                    errorElem.classList.remove('hidden');
-                }
-            })
-            .catch(() => {
-                errorElem.classList.remove('hidden');
-            });
-    }
+        function calculateBalances() {
+            const demand = parseFloat(demandInput.value) || 0;
+            const fine = parseFloat(fineInput.value) || 0;
+            const collection = parseFloat(collectionInput.value) || 0;
 
-    document.querySelectorAll('.calc-trigger').forEach(input => {
-        input.addEventListener('input', calculateArrears);
-    });
+            const total = demand + fine;
+            const due = total - collection;
 
-    function calculateArrears() {
-        const demand = parseFloat(document.getElementById('demand').value) || 0;
-        const fine = parseFloat(document.getElementById('fine').value) || 0;
-        const collection = parseFloat(document.getElementById('collection').value) || 0;
+            totalDisplay.value = total.toFixed(2);
+            dueDisplay.value = due.toFixed(2);
+        }
 
-        const totalArrear = demand + fine;
-        const dueAmount = Math.max(0, totalArrear - collection);
+        demandInput.addEventListener('input', calculateBalances);
+        fineInput.addEventListener('input', calculateBalances);
+        collectionInput.addEventListener('input', calculateBalances);
 
-        document.getElementById('total_arrear').value = totalArrear.toFixed(2);
-        document.getElementById('due_amount').value = dueAmount.toFixed(2);
-    }
+        // TIN যাচাই বাটন ক্লিক হ্যান্ডলার
+        document.getElementById('verify_tin_btn').addEventListener('click', function() {
+            const tin = document.getElementById('tin_input').value.trim();
+            if (!tin) {
+                alert('অনুগ্রহ করে টিআইএন (TIN) লিখুন');
+                return;
+            }
+
+            fetch(`/api/taxpayers/search/?tin=${encodeURIComponent(tin)}`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Not found');
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.name) {
+                        document.getElementById('taxpayer_name').value = data.name;
+                        document.getElementById('taxpayer_id').value = data.id;
+                    } else {
+                        document.getElementById('taxpayer_name').value = 'করদাতা পাওয়া যায়নি!';
+                        document.getElementById('taxpayer_id').value = '';
+                    }
+                })
+                .catch(() => {
+                    const fallbackName = prompt('করদাতার নাম ডাটাবেজে পাওয়া যায়নি। নাম ম্যানুয়ালি লিখুন:');
+                    if (fallbackName) {
+                        document.getElementById('taxpayer_name').value = fallbackName;
+                    }
+                });
+        });
     </script>
 </body>
 </html>

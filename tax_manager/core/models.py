@@ -1,5 +1,3 @@
-
-# Create your models here.
 from django.db import models
 from django.utils import timezone
 
@@ -10,7 +8,6 @@ class Taxpayer(models.Model):
     email = models.EmailField(blank=True)
     holding_or_circle = models.CharField(max_length=100, blank=True)
 
-    # default="" এবং blank=True যোগ করা হয়েছে:
     address_line1 = models.CharField(max_length=255, default="", blank=True, verbose_name="House/Holding/Road/Village")
     address_line2 = models.CharField(max_length=150, default="", blank=True, verbose_name="Post Office & Post Code")
     address_line3 = models.CharField(max_length=150, default="", blank=True, verbose_name="Upazilla & District")
@@ -25,7 +22,6 @@ class Taxpayer(models.Model):
         return f"{self.name} ({self.tin})"
 
 
-# এই মডেলটি মিসিং ছিল, নিশ্চিত করুন এটি আছে:
 class TaxAssessment(models.Model):
     """কর নির্ধারণ ও প্রারম্ভিক বকেয়া লেজার"""
     taxpayer = models.ForeignKey(Taxpayer, on_delete=models.CASCADE, related_name="assessments")
@@ -45,7 +41,7 @@ class TaxTransaction(models.Model):
         ('ADVANCE', 'Advance Tax (অগ্রিম কর)'),
         ('ARREAR', 'Arrear Tax (বকেয়া কর)'),
         ('REGULAR', 'Current Demand (চলতি কর)'),
-        ('U/S 173','With Return(রিটার্ণের সাথে আদায়)'),
+        ('U/S 173', 'With Return (রিটার্ণের সাথে আদায়)'),
     ]
     PAYMENT_MODES = [
         ('CHALLAN', 'ট্রেজারি চালান (Treasury Challan)'),
@@ -58,7 +54,6 @@ class TaxTransaction(models.Model):
     fiscal_year = models.CharField(max_length=9, help_text="e.g. 2025-2026")
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
 
-    # receipt_no বাদ দেওয়া হয়েছে, এখন চালান নম্বরই প্রধান ট্র্যাকিং নম্বর
     challan_no = models.CharField(max_length=50, blank=True, verbose_name="চালান / ভাউচার নম্বর")
     challan_date = models.DateField(null=True, blank=True, verbose_name="চালানের তারিখ")
     payment_date = models.DateField(default=timezone.now, verbose_name="পরিশোধের তারিখ")
@@ -72,6 +67,7 @@ class TaxTransaction(models.Model):
     def __str__(self):
         ref = self.challan_no if self.challan_no else f"Txn-{self.id}"
         return f"{ref} - {self.taxpayer.name} (৳{self.amount})"
+
 
 class TaxNotice(models.Model):
     NOTICE_TYPES = [
@@ -93,22 +89,35 @@ class TaxNotice(models.Model):
         return f"{self.reference_no} - {self.taxpayer.name}"
 
 
-
-        from django.db import models
-
-        class Taxpayer(models.Model):
-            # Existing model reference
-            tin = models.CharField(max_length=12, unique=True, verbose_name="টিআইএন")
-            name = models.CharField(max_length=255, verbose_name="করদাতার নাম")
-            # ... your existing fields ...
-
-            def __str__(self):
-                return f"{self.name} ({self.tin})"
-
-
 class ArrearRegister(models.Model):
+    ARREAR_TYPE_CHOICES = [
+        ('UNDISPUTED', 'অবিসংবাদিত (Undisputed)'),
+        ('DISPUTED', 'বিসংবাদিত (Disputed)'),
+    ]
+
     taxpayer = models.ForeignKey(Taxpayer, on_delete=models.CASCADE, related_name="arrears", verbose_name="করদাতা")
-    assessment_year = models.CharField(max_length=9, verbose_name="করবর্ষ") # e.g., 2023-2024
+    assessment_year = models.CharField(max_length=9, verbose_name="করবর্ষ")
+
+    arrear_type = models.CharField(
+        max_length=15,
+        choices=ARREAR_TYPE_CHOICES,
+        default='UNDISPUTED',
+        verbose_name="বকেয়ার ধরন (Arrear Type)"
+    )
+    disposal_section = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="নিষ্পত্তির ধারা (Disposal Section)",
+        help_text="যেমন: ধারা ২৭৫, ধারা ২২১(৩), আপিল/ট্রাইব্যুনাল ইত্যাদি"
+    )
+    disposal_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="নিষ্পত্তির তারিখ (Disposal Date)",
+        help_text="দাবি নিষ্পত্তি বা আদেশের তারিখ"
+    )
+
     demand = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="দাবি (Demand)")
     fine = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="জরিমানা/সুদ (Fine)")
     total_arrear = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="মোট বকেয়া দাবি")
@@ -128,18 +137,15 @@ class ArrearRegister(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.taxpayer.tin} - {self.assessment_year} (বকেয়া: {self.due_amount})"
+        return f"{self.taxpayer.tin} - {self.assessment_year} ({self.get_arrear_type_display()}) - বকেয়া: {self.due_amount}"
 
-        from django.db import models
 
 class NoticeSetting(models.Model):
-    # লেটারহেড শাখা
     govt_title = models.CharField(max_length=255, default="গণপ্রজাতন্ত্রী বাংলাদেশ সরকার", verbose_name="সরকারের নাম")
     office_title = models.CharField(max_length=255, default="উপ কর কমিশনারের কার্যালয়", verbose_name="কার্যালয়ের নাম")
     circle_line = models.CharField(max_length=255, default="সার্কেল-১৩ (ফেনী সদর), কর অঞ্চল-নোয়াখালী।", verbose_name="সার্কেল ও অঞ্চল")
     office_address = models.CharField(max_length=500, default="৩৪২/১, ফরিদা কুদ্দুস নিবাস, কুমিল্লা বাসস্ট্যান্ড, ট্রাংক রোড, ফেনী সদর, ফেনী।", verbose_name="কার্যালয়ের ঠিকানা")
 
-    # প্রেরক কর্মকর্তা শাখা (Sender Officer)
     officer_name = models.CharField(max_length=150, default="আব্দুল হক", verbose_name="কর্মকর্তার নাম")
     designation = models.CharField(max_length=150, default="উপকর কমিশনার", verbose_name="পদবী")
     sender_circle = models.CharField(max_length=150, default="সার্কেল-১৩ (ফেনী সদর)", verbose_name="সার্কেল")
