@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>পুনঃশুনানী ১৮৩ (৫) নোটিশ - {{ taxpayer.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 18mm 20mm 15mm 20mm;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            color: #000;
+            font-family: 'Noto Sans Bengali', 'SolaimanLipi', 'Kalpurush', Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .page-container {
+            width: 175mm;
+            margin: 20px auto;
+            padding: 10px 0;
+            background: #fff;
+        }
+
+        table.notice-layout {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        table.notice-layout td {
+            padding: 0;
+            vertical-align: top;
+        }
+
+        /* বকেয়া নোটিশের অনুরূপ লেটারহেড */
+        .header-section {
+            text-align: center;
+            line-height: 1.35;
+            margin-bottom: 22px;
+        }
+
+        .header-section h3 {
+            font-size: 17px;
+            margin: 0 0 3px 0;
+            font-weight: 700;
+        }
+
+        .header-section h4 {
+            font-size: 15px;
+            margin: 0 0 3px 0;
+            font-weight: 600;
+        }
+
+        .header-section p {
+            font-size: 13px;
+            margin: 1px 0;
+        }
+
+        .meta-line {
+            margin-bottom: 6px;
+            line-height: 1.45;
+        }
+
+        .address-box {
+            display: inline-block;
+            vertical-align: top;
+            line-height: 1.45;
+        }
+
+        .bold-val {
+            font-weight: 700;
+        }
+
+        .subject-line {
+            font-weight: 700;
+            margin-top: 12px;
+            margin-bottom: 8px;
+            text-decoration: underline;
+        }
+
+        .notice-p {
+            text-align: justify;
+            margin: 12px 0;
+            line-height: 1.7;
+            text-indent: 30px;
+        }
+
+        .fill-text {
+            font-weight: 700;
+            padding: 0 4px;
+            border-bottom: 1px dotted #000;
+        }
+
+        /* স্বাক্ষরকারী ও যোগাযোগ ফুটার */
+        .footer-table {
+            width: 100%;
+            margin-top: 35px;
+            border-collapse: collapse;
+        }
+
+        .footer-table td {
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .officer-box {
+            text-align: center;
+            line-height: 1.45;
+            font-size: 13.5px;
+        }
+
+        /* প্রিন্ট বাটন */
+        .action-bar {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            background: #ffffff;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+        }
+
+        .btn {
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .btn-print { background-color: #047857; }
+        .btn-close { background-color: #64748b; }
+
+        @media print {
+            .action-bar { display: none !important; }
+            html, body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            .page-container {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="action-bar">
+        <button class="btn btn-print" onclick="window.print()">🖨️ প্রিন্ট / Save as PDF</button>
+        <button class="btn btn-close" onclick="window.close()">বন্ধ করুন</button>
+    </div>
+
+    <div class="page-container">
+        <table class="notice-layout">
+            <!-- ১. বকেয়া নোটিশের লেটারহেড -->
+            <tr>
+                <td class="header-section">
+                    <h3>{{ setting.govt_title|default:"গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" }}</h3>
+                    <h4>{{ setting.office_title|default:"উপ কর কমিশনারের কার্যালয়" }}</h4>
+                    <p>{{ setting.circle_line|default:"সার্কেল-১৩ (ফেনী সদর), কর অঞ্চল-নোয়াখালী।" }}</p>
+                    <p>{{ setting.office_address|default:"৩৪২/১, ফরিদা কুদ্দুস নিবাস, কুমিল্লা বাসস্ট্যান্ড, ট্রাংক রোড, ফেনী সদর, ফেনী।" }}</p>
+                </td>
+            </tr>
+
+            <!-- ২. নথি নং ও তারিখ -->
+            <tr>
+                <td style="padding-bottom: 10px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="text-align: left; width: 55%; font-size: 14px;">
+                                নথি নং: <span class="bold-val">{{ tin_bn }}</span>
+                            </td>
+                            <td style="text-align: right; width: 45%; font-size: 14px;">
+                                তারিখ: <span class="bold-val">{{ issue_date_bn }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <!-- ৩. প্রাপক, ৩ লাইনের ঠিকানা ও বিবরণ -->
+            <tr>
+                <td style="padding-bottom: 6px;">
+                    <div class="meta-line">
+                        <span class="bold-val">{{ taxpayer.name }}</span>
+                    </div>
+
+                    <div class="meta-line">
+                        <div class="address-box">
+                            {% if taxpayer.address_line1 %}<div>{{ taxpayer.address_line1 }}</div>{% endif %}
+                            {% if taxpayer.address_line2 %}<div>{{ taxpayer.address_line2 }}</div>{% endif %}
+                            {% if taxpayer.address_line3 %}<div>{{ taxpayer.address_line3 }}</div>{% endif %}
+                            {% if not taxpayer.address_line1 and not taxpayer.address_line2 and not taxpayer.address_line3 %}
+                                <div>{{ taxpayer.full_address|linebreaksbr }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if taxpayer.phone %}
+                    <div class="meta-line">
+                        মোবাইল নং: <span class="bold-val">{{ phone_bn }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="meta-line">
+                        টিআইএন: <span class="bold-val">{{ tin_bn }}</span>
+                    </div>
+
+                    <!-- বিষয় -->
+                    <div class="subject-line">
+                        বিষয়: আয়কর মামলা নিষ্পত্তির লক্ষ্যে পুনরায় ১৮৩ (৫) ধারায় শুনানীর নোটিশ প্রেরণ প্রসঙ্গে।
+                    </div>
+
+                    <div class="meta-line">
+                        কর বৎসর: <span class="bold-val">{{ ay_bn }}</span>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- ৪. নোটিশের মূল বক্তব্য (refix.pdf অনুয়ায়ী) -->
+            <tr>
+                <td>
+                    <p class="notice-p">
+                        আপনাকে এই মর্মে অবহিত করা যাইতেছে যে, আপনি/আপনার করদাতা কোম্পানি/করদাতা ফার্মের উপর বর্ণিত কর বৎসর/কর বৎসর সমূহের কর মামলা নিষ্পত্তির জন্য ইতোমধ্যে আয়কর আইন, ২০২৩ এর ১৮৩(৩) ও ১৭৯ ধারায় শুনানীর দিন ধার্য করিয়া বিধিবদ্ধ নোটিশ জারি করা হইয়াছে।
+                    </p>
+
+                    <p class="notice-p">
+                        উপরোক্ত কর মামলা/কর মামলা সমূহ দ্রুত নিষ্পত্তিকল্পে পুনরায় আগামী <span class="fill-text">{{ hearing_date_bn }}</span> তারিখ, বেলা <span class="fill-text">{{ hearing_time_bn }}</span> ঘটিকার সময় শুনানীর দিন ধার্য করা হইল।
+                    </p>
+
+                    <p class="notice-p">
+                        আপনার বরাবরে ইতোপূর্বে জারিকৃত বিধিবদ্ধ নোটিশ সমূহের শর্তাবলী অনুযায়ী সকল ব্যাংক হিসাব বিবরণী, প্রয়োজনীয় কাগজ-পত্রাদি, দলিলাদি, ক্রয়-বিক্রয়-ক্যাশ মেমো-রেজিস্টার-চালান পত্র, খরচ দাবীর বিল-ভাউচার, বাড়ি ভাড়া প্রাপ্তির ক্ষেত্রে ভাড়ার চুক্তিপত্র সহ হিসাবের সকল প্রকারের প্রমাণাদি সহ নির্ধারিত তারিখে আপনি নিজে অথবা আপনার কর্তৃক ক্ষমতা প্রাপ্ত আইনানুগ প্রতিনিধিকে নিম্নস্বাক্ষরকারীর অফিসে উপস্থিত হইতে অনুরোধ করা যাইতেছে।
+                    </p>
+
+                    <p class="notice-p">
+                        নির্ধারিত তারিখে আপনি অথবা আপনার ক্ষমতা প্রাপ্ত আইনানুগ প্রতিনিধি শুনানীতে হাজির হইতে ব্যর্থ হইলে বর্ণিত কর বৎসর/কর বৎসর সমূহের আয়কর মামলা আয়কর আইন, ২০২৩ এর ১৮৪ ধারা মোতাবেক সর্বোত্তম বিচার বিবেচনায় একতরফা ভাবে নিষ্পত্তি করা হইবে।
+                    </p>
+
+                    <p class="notice-p">
+                        জাতীয় রাজস্ব আহরণে আপনার সহযোগিতা একান্তভাবে কাম্য।
+                    </p>
+                </td>
+            </tr>
+
+            <!-- ৫. উপ কর কমিশনারের স্বাক্ষর ব্লক -->
+            <tr>
+                <td>
+                    <table class="footer-table">
+                        <tr>
+                            <td style="width: 50%;"></td>
+                            <td style="width: 50%;" class="officer-box">
+                                <br>
+                                <strong>({{ setting.officer_name|default:"আব্দুল হক" }})</strong><br>
+                                {{ setting.designation|default:"উপ কর কমিশনার" }}<br>
+                                {{ setting.sender_circle|default:"সার্কেল-১৩ (ফেনী সদর)" }}<br>
+                                {{ setting.sender_zone|default:"কর অঞ্চল- নোয়াখালী।" }}<br>
+                                ফোন: {{ setting.phone_number|default:"০২৩৩৪৪-৭৩৬০০" }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>
