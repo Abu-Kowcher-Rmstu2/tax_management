@@ -52,5 +52,7 @@ urlpatterns = [
     path('notices/280/print/<int:taxpayer_id>/', views.notice_280_print_view, name='notice_280_print'),
     path('notices/212/create/', views.notice_212_create_view, name='notice_212_create'),
     path('notices/212/print/<int:taxpayer_id>/', views.notice_212_print_view, name='notice_212_print'),
+    path('notices/179/create/', views.notice_179_create_view, name='notice_179_create'),
+    path('notices/179/print/<int:taxpayer_id>/', views.notice_179_print_view, name='notice_179_print'),
 
 ]

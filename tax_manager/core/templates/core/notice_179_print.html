@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>আই.টি-১৩ (২০২৩) - ধারা ১৭৯ নোটিশ - {{ taxpayer.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 1.0in 0.8in 0.6in 0.8in;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #ffffff;
+            color: #000;
+            font-family: 'Noto Sans Bengali', 'SolaimanLipi', 'Kalpurush', Arial, sans-serif;
+            font-size: 14.5px;
+            line-height: 1.6;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .page-container {
+            width: 100%;
+            min-height: 257mm;
+            margin: 0 auto;
+            padding: 0;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .content-wrap {
+            flex-grow: 1;
+        }
+
+        table.notice-layout {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        table.notice-layout td {
+            padding: 0;
+            vertical-align: top;
+        }
+
+        /* আই.টি-১৩ হেডার */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+        }
+
+        .header-title-box {
+            text-align: center;
+            margin-top: 2px;
+            margin-bottom: 16px;
+        }
+
+        .header-title-box h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 3px 0;
+        }
+
+        .header-title-box p {
+            font-size: 15px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .meta-line {
+            margin-bottom: 6px;
+            line-height: 1.5;
+            font-size: 14.5px;
+        }
+
+        .address-box {
+            display: inline-block;
+            vertical-align: top;
+            line-height: 1.45;
+        }
+
+        .bold-val {
+            font-weight: 700;
+        }
+
+        /* শুধু নিচে একটি আন্ডারলাইন বর্ডার রাখার স্টাইল */
+        .fill-text {
+            font-weight: 700;
+            padding: 0 4px;
+            border-bottom: 1px dotted #000;
+            display: inline-block;
+            min-width: 90px;
+            text-align: center;
+        }
+
+        .notice-p {
+            text-align: justify;
+            margin: 12px 0;
+            line-height: 1.65;
+            font-size: 14.5px;
+        }
+
+        .points-list {
+            margin: 8px 0 8px 18px;
+        }
+
+        .points-list div {
+            margin-bottom: 8px;
+            text-align: justify;
+            line-height: 1.6;
+            font-size: 14.5px;
+        }
+
+        /* ফুটার সেকশন */
+        .footer-wrap {
+            width: 100%;
+            margin-top: auto;
+            padding-top: 15px;
+        }
+
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        .officer-box {
+            text-align: center;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .office-bottom-address {
+            font-size: 12px;
+            border-top: 1px solid #000;
+            padding-top: 4px;
+            text-align: left;
+            width: 100%;
+            line-height: 1.3;
+        }
+
+        .action-bar {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            background: #ffffff;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+        }
+
+        .btn {
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .btn-print { background-color: #047857; }
+        .btn-close { background-color: #64748b; }
+
+        @media print {
+            .action-bar { display: none !important; }
+            html, body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+            .page-container {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: 98vh !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="action-bar">
+        <button class="btn btn-print" onclick="window.print()">🖨️ প্রিন্ট / Save as PDF</button>
+        <button class="btn btn-close" onclick="window.close()">বন্ধ করুন</button>
+    </div>
+
+    <div class="page-container">
+        <div class="content-wrap">
+            <table class="notice-layout">
+                <!-- ১. হেডার -->
+                <tr>
+                    <td>
+                        <table class="header-table">
+                            <tr>
+                                <td style="text-align: left; width: 60%;">
+                                    <div style="font-size: 16px; font-weight: 700;">জাতীয় রাজস্ব বোর্ড</div>
+                                    <div style="font-size: 13px; font-family: Arial, sans-serif; font-weight: 600;">www.nbr.gov.bd</div>
+                                </td>
+                                <td style="text-align: right; width: 40%; font-size: 15px; font-weight: 700;">
+                                    আই.টি-১৩ (২০২৩)
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="header-title-box">
+                            <h3>আয়কর আইন, ২০২৩ এর ধারা ১৭৯ অনুযায়ী নোটিশ</h3>
+                            <p>(আয়কর অফিস)</p>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- ২. নথিনং ও তারিখ -->
+                <tr>
+                    <td style="padding-bottom: 8px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="text-align: left; width: 55%; font-size: 14.5px;">
+                                    নথি নং: <span class="bold-val">{{ tin_bn }}</span>
+                                </td>
+                                <td style="text-align: right; width: 45%; font-size: 14.5px;">
+                                    তারিখ: <span class="bold-val">{{ issue_date_bn }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- ৩. করদাতার বিবরণ -->
+                <tr>
+                    <td style="padding-bottom: 8px;">
+                        <div class="meta-line">প্রতি</div>
+
+                        <div class="meta-line">
+                            করদাতার নাম: <span class="bold-val">{{ taxpayer.name }}</span>
+                        </div>
+
+                        <div class="meta-line">
+                            <span style="display: inline-block; vertical-align: top; width: 70px;">ঠিকানা:</span>
+                            <div class="address-box">
+                                {% if taxpayer.address_line1 %}<div>{{ taxpayer.address_line1 }}</div>{% endif %}
+                                {% if taxpayer.address_line2 %}<div>{{ taxpayer.address_line2 }}</div>{% endif %}
+                                {% if taxpayer.address_line3 %}<div>{{ taxpayer.address_line3 }}</div>{% endif %}
+                                {% if not taxpayer.address_line1 and not taxpayer.address_line2 and not taxpayer.address_line3 %}
+                                    <div>{{ taxpayer.full_address|linebreaksbr }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if taxpayer.phone %}
+                        <div class="meta-line">
+                            মোবাইল নং: <span class="bold-val">{{ phone_bn }}</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="meta-line" style="margin-top: 4px;">
+                            টিআইএন: <span class="bold-val">{{ tin_bn }}</span>
+                        </div>
+
+                        <div class="meta-line">
+                            করবর্ষ: <span class="bold-val">{{ ay_bn }}</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- ৪. মূল নোটিশ বডি (একক আন্ডারলাইন বিশিষ্ট ডটেড ব্ল্যাঙ্ক স্পেস) -->
+                <tr>
+                    <td>
+                        <p class="notice-p">
+                            যেহেতু উপরিউক্ত করবর্ষের আয়কর ধার্য প্রসঙ্গে আয়কর আইন, ২০২৩ এর ধারা ১৬৬, ১৭৫ বা ১৭৬ অনুযায়ী আপনি একখানি আয়কর রিটার্ন দাখিল করিয়াছেন/ ধারা ১৭২ বা ২১২ অনুযায়ী <span class="fill-text">{{ notice_data.notice_date|default:"" }}</span> খ্রি. তারিখ যুক্ত একটি নোটিশ <span class="fill-text">{{ notice_data.served_date|default:"" }}</span> তারিখে আপনার উপর জারী করা হইয়াছে, উক্ত আইনের ধারা ১৭৯ অনুযায়ী আপনাকে অবহিত করা হইতেছে যে, নিম্নস্বাক্ষরকারীর অফিসে <span class="fill-text" style="min-width: 100px;">{{ hearing_date_bn }}</span> তারিখ <span class="fill-text" style="min-width: 60px;">{{ hearing_time_bn }}</span> ঘটিকায় নিম্নবর্ণিত হিসাব বহি/দলিলাদি দাখিল করিবেন।
+                        </p>
+
+                        <p class="notice-p">
+                            এই নোটিশ পরিপালনে ব্যর্থ হইলে আয়কর আইন, ২০২৩ এর ধারা ২৭০ অনুযায়ী জরিমানা আরোপের বিধান রহিয়াছে।
+                        </p>
+
+                        <p class="notice-p" style="font-weight: 700; margin-top: 14px;">
+                            হিসাব বহি/দলিলাদির বিবরণ (প্রযোজ্য ক্ষেত্রে):
+                        </p>
+
+                        <div class="points-list">
+                            <div style="{% if '1' in notice_data.doc_details %}font-weight:700;{% endif %}">১. প্রদর্শিত সকল খাতের সমর্থনে যাচাইযোগ্য প্রমাণাদি;</div>
+                            <div style="{% if '2' in notice_data.doc_details %}font-weight:700;{% endif %}">২. আই.টি-১০ বি তে প্রদর্শিত সম্পদের হ্রাস বৃদ্ধির সমর্থনে প্রমাণাদি;</div>
+                            <div style="{% if '3' in notice_data.doc_details %}font-weight:700;{% endif %}">৩. ব্যাংক হিসাব বিবরণী;</div>
+                            <div style="{% if '4' in notice_data.doc_details %}font-weight:700;{% endif %}">৪. পারিবারিক খরচের সমর্থনে প্রমাণাদি;</div>
+                            <div style="{% if '5' in notice_data.doc_details %}font-weight:700;{% endif %}">৫. বাড়ি ভাড়ার চুক্তিনামা/বাড়ীর নকশা/ভাড়া আদায় রশিদ (প্রযোজ্য ক্ষেত্রে);</div>
+                            <div style="{% if '6' in notice_data.doc_details %}font-weight:700;{% endif %}">৬. বিনিয়োগ এবং বিনিয়োগকৃত ফান্ডের উৎস সংক্রান্ত প্রমাণাদি (প্রযোজ্য ক্ষেত্রে);</div>
+                            {% if notice_data.custom_doc_details %}
+                            <div style="font-weight:700;">৭. {{ notice_data.custom_doc_details }}</div>
+                            {% else %}
+                            <div>৭. অন্যান্য.........................................................</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- ৫. ফুটার -->
+        <div class="footer-wrap">
+            <table class="footer-table">
+                <tr>
+                    <td style="width: 58%;"></td>
+                    <td style="width: 42%;" class="officer-box">
+                        <strong>({{ setting.officer_name|default:"আব্দুল হক" }})</strong><br>
+                        {{ setting.designation|default:"উপকর কমিশনার" }}<br>
+                        {{ setting.sender_circle|default:"সার্কেল-১৩ (ফেনী সদর)" }}<br>
+                        {{ setting.sender_zone|default:"কর অঞ্চল- নোয়াখালী" }}
+                    </td>
+                </tr>
+            </table>
+
+            <div class="office-bottom-address">
+                অফিসের ঠিকানা: {{ setting.office_address|default:"উপকর কমিশনার কার্যালয়, সার্কেল-১৩ (ফেনী সদর), নিজাম টাওয়ার (৩য় তলা), নোয়াখালী রোড, মহিপাল, ফেনী" }}
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
