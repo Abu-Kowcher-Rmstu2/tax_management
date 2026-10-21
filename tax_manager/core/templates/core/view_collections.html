@@ -47,37 +47,46 @@
             <form method="GET" action="{% url 'view_collections' %}" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
 
                 <!-- ১. টিআইএন দিয়ে সার্চ -->
-                <div class="sm:col-span-4">
-                    <label class="block text-xs font-bold text-slate-700 mb-1">করদাতার টিআইএন (TIN Number)</label>
-                    <input type="text" name="tin" value="{{ tin_query }}" placeholder="যেমন: ১২ ডিজিটের TIN..."
+                <div class="sm:col-span-3">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">করদাতার টিআইএন (TIN)</label>
+                    <input type="text" name="tin" value="{{ tin_query }}" placeholder="১২ ডিজিটের TIN..."
                            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-mono">
                 </div>
 
                 <!-- ২. আদায়ের ধরন -->
-                <div class="sm:col-span-3">
-                    <label class="block text-xs font-bold text-slate-700 mb-1">কলেকশনের ধরন (Collection Type)</label>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">কলেকশনের ধরন</label>
                     <select name="type" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <option value="">-- সকল ধরনের আদায় --</option>
-                        <option value="ADVANCE" {% if type_query == 'ADVANCE' %}selected{% endif %}>অগ্রিম কর (Advance Tax)</option>
-                        <option value="ARREAR" {% if type_query == 'ARREAR' %}selected{% endif %}>বকেয়া কর (Arrear Tax)</option>
-                        <option value="REGULAR" {% if type_query == 'REGULAR' %}selected{% endif %}>চলতি কর দাবি (Current Demand)</option>
-                        <option value="U/S 173"{% if type_query == 'U/S 173' %}selected{% endif %}>রিটার্ণের সাথে আদায় (U/S 173)</option>
+                        <option value="">-- সকল ধরন --</option>
+                        <option value="ADVANCE" {% if type_query == 'ADVANCE' %}selected{% endif %}>অগ্রিম কর</option>
+                        <option value="ARREAR" {% if type_query == 'ARREAR' %}selected{% endif %}>বকেয়া কর</option>
+                        <option value="REGULAR" {% if type_query == 'REGULAR' %}selected{% endif %}>চলতি কর</option>
+                        <option value="U/S 173" {% if type_query == 'U/S 173' %}selected{% endif %}>U/S 173</option>
                     </select>
                 </div>
 
                 <!-- ৩. অর্থবছর / করবর্ষ -->
-                <div class="sm:col-span-3">
-                    <label class="block text-xs font-bold text-slate-700 mb-1">অর্থবছর / করবর্ষ (Assessment Year)</label>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">অর্থবছর / করবর্ষ</label>
                     <input type="text" name="year" value="{{ year_query }}" placeholder="যেমন: 2025-2026"
                            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
                 </div>
 
-                <!-- ৪. বাটনসমূহ -->
+                <!-- ৪. শুরু ও শেষ তারিখ (Date Interval) -->
+                <div class="sm:col-span-3">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">জমার সময়কাল (শুরু হতে শেষ তারিখ)</label>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <input type="date" name="start_date" value="{{ start_date }}" class="w-full px-2 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <input type="date" name="end_date" value="{{ end_date }}" class="w-full px-2 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- ৫. বাটনসমূহ -->
                 <div class="sm:col-span-2 flex space-x-2">
-                    <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2 px-3 text-sm rounded-lg transition shadow">
+                    <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2 px-3 text-sm rounded-lg transition shadow whitespace-nowrap">
                         🔍 খুঁজুন
                     </button>
-                    {% if tin_query or type_query or year_query %}
+                    {% if tin_query or type_query or year_query or start_date or end_date %}
                         <a href="{% url 'view_collections' %}" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 text-sm rounded-lg transition flex items-center justify-center">
                             রিসেট
                         </a>
@@ -97,6 +106,9 @@
                     মোট এন্ট্রি: <strong>{{ total_count }}</strong> টি
                     {% if year_query %}| অর্থবছর: <strong>{{ year_query }}</strong>{% endif %}
                     {% if type_query %}| ধরন: <strong>{{ type_query }}</strong>{% endif %}
+                    {% if start_date or end_date %}
+                        | সময়কাল: <strong>{{ start_date|default:"শুরু" }} হতে {{ end_date|default:"আজ" }}</strong>
+                    {% endif %}
                 </p>
             </div>
             <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
@@ -140,8 +152,8 @@
                                     <span class="px-2 py-0.5 bg-teal-100 text-teal-800 rounded font-semibold text-[11px]">অগ্রিম কর</span>
                                 {% elif item.transaction_type == 'ARREAR' %}
                                     <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-semibold text-[11px]">বকেয়া কর</span>
-                                    {% elif item.transaction_type == 'U/S 173' %}
-                                        <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-semibold text-[11px]">রিটার্নের সথে আদায়</span>
+                                {% elif item.transaction_type == 'U/S 173' %}
+                                    <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold text-[11px]">রিটার্নের সাথে আদায়</span>
                                 {% else %}
                                     <span class="px-2 py-0.5 bg-slate-100 text-slate-800 rounded font-semibold text-[11px]">চলতি কর</span>
                                 {% endif %}

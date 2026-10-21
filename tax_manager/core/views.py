@@ -62,7 +62,7 @@ def dashboard_view(request):
     return render(request, 'core/dashboard.html', context)
 
 
-    from .models import AdvanceTaxRegister
+from .models import AdvanceTaxRegister
 
 @login_required(login_url='home')
 def advance_register_view(request):
@@ -389,14 +389,16 @@ def edit_taxpayer_view(request, pk):
 
     return render(request, 'core/edit_taxpayer.html', {'taxpayer': taxpayer})
 
-    from django.db.models import Sum
+from django.db.models import Sum
 
 @login_required(login_url='home')
 def view_collections_view(request):
-    """সকল কর আদায় তালিকা এবং মাল্টি-ফিল্টার অনুসন্ধান ভিউ"""
+    """সকল কর আদায় তালিকা এবং তারিখের সময়কালসহ মাল্টি-ফিল্টার অনুসন্ধান ভিউ"""
     tin_query = request.GET.get('tin', '').strip()
     type_query = request.GET.get('type', '').strip()
     year_query = request.GET.get('year', '').strip()
+    start_date = request.GET.get('start_date', '').strip()
+    end_date = request.GET.get('end_date', '').strip()
 
     collections = TaxTransaction.objects.select_related('taxpayer').order_by('-payment_date', '-id')
 
@@ -407,6 +409,12 @@ def view_collections_view(request):
         collections = collections.filter(transaction_type=type_query)
     if year_query:
         collections = collections.filter(fiscal_year__icontains=year_query)
+
+    # জমার তারিখের ডেট রেঞ্জ (Date Range) ফিল্টার
+    if start_date:
+        collections = collections.filter(payment_date__gte=start_date)
+    if end_date:
+        collections = collections.filter(payment_date__lte=end_date)
 
     # বর্তমান ফিল্টার করা রেকর্ডের মোট আদায়
     total_amount = collections.aggregate(total=Sum('amount'))['total'] or 0.00
@@ -419,13 +427,13 @@ def view_collections_view(request):
         'tin_query': tin_query,
         'type_query': type_query,
         'year_query': year_query,
+        'start_date': start_date,
+        'end_date': end_date,
         'total_amount': total_amount,
         'total_count': collections.count(),
         'available_years': available_years,
     }
     return render(request, 'core/view_collections.html', context)
-
-
 
 
 
@@ -768,8 +776,8 @@ def notice_183_print_view(request, taxpayer_id):
     return render(request, 'core/notice_183_print.html', context)
 
 
-    import time
-    from datetime import date, datetime
+import time
+from datetime import date, datetime
 
 # ১. পুনঃশুনানী ১৮৩(৫) নোটিশ প্রস্তুতকরণ ও ফর্ম ভিউ
 @login_required(login_url='home')
