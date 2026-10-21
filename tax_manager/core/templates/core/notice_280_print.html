@@ -14,26 +14,35 @@
 
         @page {
             size: A4 portrait;
-            margin: 15mm 18mm 12mm 18mm;
+            margin: 12mm 18mm 12mm 18mm;
         }
 
         html, body {
             margin: 0;
             padding: 0;
+            height: 100%;
             background: #ffffff;
             color: #000;
             font-family: 'Noto Sans Bengali', 'SolaimanLipi', 'Kalpurush', Arial, sans-serif;
-            font-size: 13.5px;
-            line-height: 1.5;
+            font-size: 13.5px; /* Minimum 13.5px+ for clear readability */
+            line-height: 1.45;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
         .page-container {
             width: 175mm;
-            margin: 15px auto;
-            padding: 5px 0;
+            min-height: 265mm;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             background: #fff;
+        }
+
+        .content-wrap {
+            flex-grow: 1;
         }
 
         table.notice-layout {
@@ -47,40 +56,41 @@
             vertical-align: top;
         }
 
-        /* অফিসিয়াল আই.টি-১২৪ হেডার */
+        /* আই.টি-১২৪ হেডার */
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 6px;
         }
 
         .header-title-box {
             text-align: center;
-            margin-top: 5px;
-            margin-bottom: 15px;
+            margin-top: 2px;
+            margin-bottom: 12px;
         }
 
         .header-title-box h3 {
-            font-size: 16px;
+            font-size: 17px; /* 17px Header */
             font-weight: 700;
             margin: 0 0 2px 0;
         }
 
         .header-title-box p {
-            font-size: 13px;
+            font-size: 14px; /* 14px Sub-header */
             margin: 0;
             font-weight: 600;
         }
 
         .meta-line {
-            margin-bottom: 6px;
-            line-height: 1.45;
+            margin-bottom: 4px;
+            line-height: 1.4;
+            font-size: 13.5px;
         }
 
         .address-box {
             display: inline-block;
             vertical-align: top;
-            line-height: 1.4;
+            line-height: 1.35;
         }
 
         .bold-val {
@@ -89,14 +99,14 @@
 
         /* পয়েন্ট তালিকার স্টাইল */
         .points-list {
-            margin: 8px 0;
-            padding-left: 15px;
+            margin: 4px 0 4px 10px;
             font-size: 13px;
         }
 
         .points-list div {
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             text-align: justify;
+            line-height: 1.35;
         }
 
         .checked-item {
@@ -110,18 +120,35 @@
             border-bottom: 1px dotted #000;
         }
 
+        /* ফুটার সেকশন: নিচে ডানপাশে কর্মকর্তা ও একবারে নিচে ঠিকানা */
+        .footer-wrap {
+            width: 100%;
+            margin-top: auto;
+            padding-top: 10px;
+        }
+
         .footer-table {
             width: 100%;
-            margin-top: 30px;
             border-collapse: collapse;
+            margin-bottom: 15px;
         }
 
         .officer-box {
             text-align: center;
             line-height: 1.4;
-            font-size: 13px;
+            font-size: 13.5px;
         }
 
+        .office-bottom-address {
+            font-size: 12px;
+            border-top: 1px solid #000;
+            padding-top: 4px;
+            text-align: left;
+            width: 100%;
+            clear: both;
+        }
+
+        /* প্রিন্ট বাটন বার */
         .action-bar {
             position: fixed;
             top: 15px;
@@ -156,10 +183,12 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
+                height: 100% !important;
             }
             .page-container {
                 width: 100% !important;
                 max-width: 100% !important;
+                min-height: 98vh !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
@@ -174,149 +203,149 @@
     </div>
 
     <div class="page-container">
-        <table class="notice-layout">
-            <!-- ১. হেডার -->
-            <tr>
-                <td>
-                    <table class="header-table">
-                        <tr>
-                            <td style="text-align: left; width: 60%;">
-                                <div style="font-size: 15px; font-weight: 700;">জাতীয় রাজস্ব বোর্ড</div>
-                                <div style="font-size: 12px; font-family: Arial, sans-serif; font-weight: 600;">www.nbr.gov.bd</div>
-                            </td>
-                            <td style="text-align: right; width: 40%; font-size: 14px; font-weight: 700;">
-                                আই.টি-১২৪ (২০২৩)
-                            </td>
-                        </tr>
-                    </table>
+        <div class="content-wrap">
+            <table class="notice-layout">
+                <!-- ১. হেডার -->
+                <tr>
+                    <td>
+                        <table class="header-table">
+                            <tr>
+                                <td style="text-align: left; width: 60%;">
+                                    <div style="font-size: 15px; font-weight: 700;">জাতীয় রাজস্ব বোর্ড</div>
+                                    <div style="font-size: 12px; font-family: Arial, sans-serif; font-weight: 600;">www.nbr.gov.bd</div>
+                                </td>
+                                <td style="text-align: right; width: 40%; font-size: 14.5px; font-weight: 700;">
+                                    আই.টি-১২৪ (২০২৩)
+                                </td>
+                            </tr>
+                        </table>
 
-                    <div class="header-title-box">
-                        <h3>আয়কর আইন, ২০২৩ এর ধারা ২৮০ অনুযায়ী নোটিশ</h3>
-                        <p>(আয়কর অফিস)</p>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- ২. নং ও তারিখ -->
-            <tr>
-                <td style="padding-bottom: 10px;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <td style="text-align: left; width: 55%; font-size: 14px;">
-                                নং: <span class="bold-val">{{ tin_bn }}</span>
-                            </td>
-                            <td style="text-align: right; width: 45%; font-size: 14px;">
-                                তারিখ: <span class="bold-val">{{ issue_date_bn }}</span>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-
-            <!-- ৩. করদাতার বিবরণ -->
-            <tr>
-                <td style="padding-bottom: 8px;">
-                    <div class="meta-line">প্রতি</div>
-
-                    <div class="meta-line" style="margin-top: 6px;">
-                        করদাতার নাম: <span class="bold-val">{{ taxpayer.name }}</span>
-                    </div>
-
-                    <div class="meta-line">
-                        <span style="display: inline-block; vertical-align: top; width: 75px;">ঠিকানা:</span>
-                        <div class="address-box">
-                            {% if taxpayer.address_line1 %}<div>{{ taxpayer.address_line1 }}</div>{% endif %}
-                            {% if taxpayer.address_line2 %}<div>{{ taxpayer.address_line2 }}</div>{% endif %}
-                            {% if taxpayer.address_line3 %}<div>{{ taxpayer.address_line3 }}</div>{% endif %}
-                            {% if not taxpayer.address_line1 and not taxpayer.address_line2 and not taxpayer.address_line3 %}
-                                <div>{{ taxpayer.full_address|linebreaksbr }}</div>
-                            {% endif %}
+                        <div class="header-title-box">
+                            <h3>আয়কর আইন, ২০২৩ এর ধারা ২৮০ অনুযায়ী নোটিশ</h3>
+                            <p>(আয়কর অফিস)</p>
                         </div>
-                    </div>
+                    </td>
+                </tr>
 
-                    {% if taxpayer.phone %}
-                    <div class="meta-line">
-                        মোবাইল নং: <span class="bold-val">{{ phone_bn }}</span>
-                    </div>
-                    {% endif %}
+                <!-- ২. নং ও তারিখ -->
+                <tr>
+                    <td style="padding-bottom: 6px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="text-align: left; width: 55%; font-size: 14px;">
+                                    নং: <span class="bold-val">{{ tin_bn }}</span>
+                                </td>
+                                <td style="text-align: right; width: 45%; font-size: 14px;">
+                                    তারিখ: <span class="bold-val">{{ issue_date_bn }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
 
-                    <div class="meta-line" style="margin-top: 8px;">
-                        টিআইএন: <span class="bold-val">{{ tin_bn }}</span>
-                    </div>
+                <!-- ৩. করদাতার বিবরণ -->
+                <tr>
+                    <td style="padding-bottom: 6px;">
+                        <div class="meta-line">প্রতি</div>
 
-                    <div class="meta-line">
-                        করবর্ষ: <span class="bold-val">{{ ay_bn }}</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- ৪. মূল নোটিশের বডি (PDF IT-124 অনুযায়ী) -->
-            <tr>
-                <td>
-                    <div style="margin-top: 8px; margin-bottom: 6px;">অত্র কার্যালয়ের রেকর্ড মোতাবেক</div>
-
-                    <div style="margin-left: 10px;">
-                        ১) আপনি আয়কর আইন, ২০২৩ এর ধারা <span class="fill-text">{{ failure_section_bn|default:"............" }}</span> অনুযায়ী
-
-                        <div class="points-list">
-                            <div class="{% if 'a' in notice_data.reasons_1 %}checked-item{% endif %}">ক) আয়কর রিটার্ন/উৎসে করের রিটার্ন দাখিল করিতে ব্যর্থ হইয়াছেন;</div>
-                            <div class="{% if 'b' in notice_data.reasons_1 %}checked-item{% endif %}">খ) সংশ্লিষ্ট করবর্ষের জন্য প্রদেয় প্রত্যয়নপত্র/বিবৃতি/হিসাবের খাতাপত্র অথবা তথ্যাদি দাখিল/নির্ধারিত পদ্ধতিতে সংরক্ষণ করিতে ব্যর্থ হইয়াছেন;</div>
-                            <div class="{% if 'c' in notice_data.reasons_1 %}checked-item{% endif %}">গ) সংশ্লিষ্ট করবর্ষের জন্য অগ্রিম কর প্রদানে ব্যর্থ হইয়াছেন/অগ্রিম করের অসত্য প্রাক্কলন উপস্থাপন করিয়াছেন;</div>
-                            <div class="{% if 'd' in notice_data.reasons_1 %}checked-item{% endif %}">ঘ) সংশ্লিষ্ট করবর্ষের জন্য প্রেরিত নোটিশের শর্ত পরিপালন করিতে ব্যর্থ হইয়াছেন/নোটিশ অমান্য করিয়াছেন;</div>
-                            <div class="{% if 'e' in notice_data.reasons_1 %}checked-item{% endif %}">ঙ) সংশ্লিষ্ট করবর্ষের জন্য রিটার্নের ভিত্তিতে প্রদেয় কর পরিশোধ করিতে ব্যর্থ হইয়াছেন;</div>
-                            <div class="{% if 'f' in notice_data.reasons_1 %}checked-item{% endif %}">চ) সংশ্লিষ্ট করবর্ষের জন্য প্রদেয় অংকের কর পরিশোধ এড়াইয়া গিয়াছেন/ফাঁকি দিয়াছেন;</div>
-                            <div class="{% if 'g' in notice_data.reasons_1 %}checked-item{% endif %}">ছ) আর্মস লেংথ প্রাইস পরিগণনার বিধান পরিপালন করিতে ব্যর্থ হইয়াছেন;</div>
-                            <div class="{% if 'h' in notice_data.reasons_1 %}checked-item{% endif %}">জ) আন্তর্জাতিক লেনদেনের ক্ষেত্রে তথ্য, দলিলাদি ও রেকর্ড সংরক্ষণ ও রক্ষণাবেক্ষণ বা সরবরাহ করিতে ব্যর্থ হইয়াছেন;</div>
-                            <div>ঝ) আন্তর্জাতিক লেনদেন সম্পর্কিত বিবরণী/ আন্তর্জাতিক লেনদেন সম্পর্কিত চার্টার্ড এ্যাকাউন্টেন্ট হইতে প্রতিবেদন দাখিলে ব্যর্থ হইয়াছেন;</div>
-                            {% if notice_data.custom_reason_1 %}
-                            <div class="checked-item">ট) {{ notice_data.custom_reason_1 }}</div>
-                            {% else %}
-                            <div>ট) অন্যান্য...........................................................................................................</div>
-                            {% endif %}
+                        <div class="meta-line">
+                            করদাতার নাম: <span class="bold-val">{{ taxpayer.name }}</span>
                         </div>
-                    </div>
 
-                    <div style="margin-left: 10px; margin-top: 8px;">
-                        ২) আপনি,
-                        <div class="points-list">
-                            <div class="{% if 'a' in notice_data.reasons_2 %}checked-item{% endif %}">ক) জাল (fake) টিআইএন ব্যবহার করিয়াছেন/জাল নিরীক্ষা প্রতিবেদন প্রনয়ণ/দাখিল করিয়াছেন;</div>
-                            <div class="{% if 'b' in notice_data.reasons_2 %}checked-item{% endif %}">খ) অসত্য অথবা অশুদ্ধ নিরীক্ষিত হিসাব বিবরণী প্রনয়ন/দাখিল করিয়াছেন/ চার্টার্ড এ্যাকাউন্টেন্ট কর্তৃক IAS, IFRS ও ISA অনুসরণ করার প্রত্যয়ন করা হয় নাই;</div>
-                            <div class="{% if 'c' in notice_data.reasons_2 %}checked-item{% endif %}">গ) কর পরিশোধে খেলাপী হইয়াছেন;</div>
-                            {% if notice_data.custom_reason_2 %}
-                            <div class="checked-item">ঘ) {{ notice_data.custom_reason_2 }}</div>
-                            {% else %}
-                            <div>ঘ) অন্যান্য........................................................................................................... পরিপালন করিতে ব্যর্থ হইয়াছেন;</div>
-                            {% endif %}
+                        <div class="meta-line">
+                            <span style="display: inline-block; vertical-align: top; width: 70px;">ঠিকানা:</span>
+                            <div class="address-box">
+                                {% if taxpayer.address_line1 %}<div>{{ taxpayer.address_line1 }}</div>{% endif %}
+                                {% if taxpayer.address_line2 %}<div>{{ taxpayer.address_line2 }}</div>{% endif %}
+                                {% if taxpayer.address_line3 %}<div>{{ taxpayer.address_line3 }}</div>{% endif %}
+                                {% if not taxpayer.address_line1 and not taxpayer.address_line2 and not taxpayer.address_line3 %}
+                                    <div>{{ taxpayer.full_address|linebreaksbr }}</div>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
 
-                    <p style="text-align: justify; margin-top: 15px; line-height: 1.75;">
-                        এতদ্বারা আপনাকে আয়কর আইন, ২০২৩ এর ধারা <span class="fill-text">{{ penalty_section_bn|default:"............" }}</span> অনুযায়ী কেন জরিমানা আরোপ করা হইবে না তাহার কারণ দর্শাইতে <span class="fill-text">{{ hearing_date_bn }}</span> তারিখ <span class="fill-text">{{ hearing_time_bn }}</span> ঘটিকায় আপনাকে স্বয়ং অথবা আয়কর আইন, ২০২৩ এর ধারা ৩২৭ অনুযায়ী লিখিতভাবে ক্ষমতাপ্রাপ্ত অনুমোদিত প্রতিনিধিকে নিম্নস্বাক্ষরকারীর অফিসে শুনানীতে উপস্থিত হইতে অনুরোধ করা যাইতেছে।
-                    </p>
-                </td>
-            </tr>
+                        {% if taxpayer.phone %}
+                        <div class="meta-line">
+                            মোবাইল নং: <span class="bold-val">{{ phone_bn }}</span>
+                        </div>
+                        {% endif %}
 
-            <!-- ৫. প্রেরক কর্মকর্তা ও অফিসের ঠিকানা -->
-            <tr>
-                <td>
-                    <table class="footer-table">
-                        <tr>
-                            <td style="width: 45%;"></td>
-                            <td style="width: 55%;" class="officer-box">
-                                <br>
-                                <strong>({{ setting.officer_name|default:"আব্দুল হক" }})</strong><br>
-                                {{ setting.designation|default:"উপকর কমিশনার" }}<br>
-                                {{ setting.sender_circle|default:"সার্কেল-১৩ (ফেনী সদর)" }}<br>
-                                {{ setting.sender_zone|default:"কর অঞ্চল- নোয়াখালী" }}
-                            </td>
-                        </tr>
-                    </table>
-                    <div style="margin-top: 20px; font-size: 11.5px; border-t: 1px solid #ccc; padding-top: 4px;">
-                        অফিসের ঠিকানা: {{ setting.office_address|default:"উপকর কমিশনার কার্যালয়, সার্কেল-১৩ (ফেনী সদর), নিজাম টাওয়ার (৩য় তলা), নোয়াখালী রোড, মহিপাল, ফেনী" }}
-                    </div>
-                </td>
-            </tr>
-        </table>
+                        <div class="meta-line" style="margin-top: 4px;">
+                            টিআইএন: <span class="bold-val">{{ tin_bn }}</span>
+                        </div>
+
+                        <div class="meta-line">
+                            করবর্ষ: <span class="bold-val">{{ ay_bn }}</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- ৪. মূল নোটিশ বডি -->
+                <tr>
+                    <td>
+                        <div style="margin-top: 6px; margin-bottom: 4px; font-weight: 500;">অত্র কার্যালয়ের রেকর্ড মোতাবেক</div>
+
+                        <div>
+                            ১) আপনি আয়কর আইন, ২০২৩ এর ধারা <span class="fill-text">{{ failure_section_bn|default:"............" }}</span> অনুযায়ী
+
+                            <div class="points-list">
+                                <div class="{% if 'a' in notice_data.reasons_1 %}checked-item{% endif %}">ক) আয়কর রিটার্ন/উৎসে করের রিটার্ন দাখিল করিতে ব্যর্থ হইয়াছেন;</div>
+                                <div class="{% if 'b' in notice_data.reasons_1 %}checked-item{% endif %}">খ) সংশ্লিষ্ট করবর্ষের জন্য প্রদেয় প্রত্যয়নপত্র/বিবৃতি/হিসাবের খাতাপত্র অথবা তথ্যাদি দাখিল/নির্ধারিত পদ্ধতিতে সংরক্ষণ করিতে ব্যর্থ হইয়াছেন;</div>
+                                <div class="{% if 'c' in notice_data.reasons_1 %}checked-item{% endif %}">গ) সংশ্লিষ্ট করবর্ষের জন্য অগ্রিম কর প্রদানে ব্যর্থ হইয়াছেন/অগ্রিম করের অসত্য প্রাক্কলন উপস্থাপন করিয়াছেন;</div>
+                                <div class="{% if 'd' in notice_data.reasons_1 %}checked-item{% endif %}">ঘ) সংশ্লিষ্ট করবর্ষের জন্য প্রেরিত নোটিশের শর্ত পরিপালন করিতে ব্যর্থ হইয়াছেন/নোটিশ অমান্য করিয়াছেন;</div>
+                                <div class="{% if 'e' in notice_data.reasons_1 %}checked-item{% endif %}">ঙ) সংশ্লিষ্ট করবর্ষের জন্য রিটার্নের ভিত্তিতে প্রদেয় কর পরিশোধ করিতে ব্যর্থ হইয়াছেন;</div>
+                                <div class="{% if 'f' in notice_data.reasons_1 %}checked-item{% endif %}">চ) সংশ্লিষ্ট করবর্ষের জন্য প্রদেয় অংকের কর পরিশোধ এড়াইয়া গিয়াছেন/ফাঁকি দিয়াছেন;</div>
+                                <div class="{% if 'g' in notice_data.reasons_1 %}checked-item{% endif %}">ছ) আর্মস লেংথ প্রাইস পরিগণনার বিধান পরিপালন করিতে ব্যর্থ হইয়াছেন;</div>
+                                <div class="{% if 'h' in notice_data.reasons_1 %}checked-item{% endif %}">জ) আন্তর্জাতিক লেনদেনের ক্ষেত্রে তথ্য, দলিলাদি ও রেকর্ড সংরক্ষণ ও রক্ষণাবেক্ষণ বা সরবরাহ করিতে ব্যর্থ হইয়াছেন;</div>
+                                <div>ঝ) আন্তর্জাতিক লেনদেন সম্পর্কিত বিবরণী/ আন্তর্জাতিক লেনদেন সম্পর্কিত চার্টার্ড এ্যাকাউন্টেন্ট হইতে প্রতিবেদন দাখিলে ব্যর্থ হইয়াছেন;</div>
+                                {% if notice_data.custom_reason_1 %}
+                                <div class="checked-item">ট) {{ notice_data.custom_reason_1 }}</div>
+                                {% else %}
+                                <div>ট) অন্যান্য...........................................................................................................</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 6px;">
+                            ২) আপনি,
+                            <div class="points-list">
+                                <div class="{% if 'a' in notice_data.reasons_2 %}checked-item{% endif %}">ক) জাল (fake) টিআইএন ব্যবহার করিয়াছেন/জাল নিরীক্ষা প্রতিবেদন প্রনয়ণ/দাখিল করিয়াছেন;</div>
+                                <div class="{% if 'b' in notice_data.reasons_2 %}checked-item{% endif %}">খ) অসত্য অথবা অশুদ্ধ নিরীক্ষিত হিসাব বিবরণী প্রনয়ন/দাখিল করিয়াছেন/ চার্টার্ড এ্যাকাউন্টেন্ট কর্তৃক IAS, IFRS ও ISA অনুসরণ করার প্রত্যয়ন করা হয় নাই;</div>
+                                <div class="{% if 'c' in notice_data.reasons_2 %}checked-item{% endif %}">গ) কর পরিশোধে খেলাপী হইয়াছেন;</div>
+                                {% if notice_data.custom_reason_2 %}
+                                <div class="checked-item">ঘ) {{ notice_data.custom_reason_2 }}</div>
+                                {% else %}
+                                <div>ঘ) অন্যান্য........................................................................................................... পরিপালন করিতে ব্যর্থ হইয়াছেন;</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <p style="text-align: justify; margin-top: 10px; margin-bottom: 6px; line-height: 1.55;">
+                            এতদ্বারা আপনাকে আয়কর আইন, ২০২৩ এর ধারা <span class="fill-text">{{ penalty_section_bn|default:"............" }}</span> অনুযায়ী কেন জরিমানা আরোপ করা হইবে না তাহার কারণ দর্শাইতে <span class="fill-text">{{ hearing_date_bn }}</span> তারিখ <span class="fill-text">{{ hearing_time_bn }}</span> ঘটিকায় আপনাকে স্বয়ং অথবা আয়কর আইন, ২০২৩ এর ধারা ৩২৭ অনুযায়ী লিখিতভাবে ক্ষমতাপ্রাপ্ত অনুমোদিত প্রতিনিধিকে নিম্নস্বাক্ষরকারীর অফিসে শুনানীতে উপস্থিত হইতে অনুরোধ করা যাইতেছে।
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- ৫. ফুটার (উপকর কমিশনার ডানে এবং একবারে নিচে অফিসের ঠিকানা) -->
+        <div class="footer-wrap">
+            <table class="footer-table">
+                <tr>
+                    <td style="width: 45%;"></td>
+                    <td style="width: 55%;" class="officer-box">
+                        <strong>({{ setting.officer_name|default:"আব্দুল হক" }})</strong><br>
+                        {{ setting.designation|default:"উপকর কমিশনার" }}<br>
+                        {{ setting.sender_circle|default:"সার্কেল-১৩ (ফেনী সদর)" }}<br>
+                        {{ setting.sender_zone|default:"কর অঞ্চল- নোয়াখালী" }}
+                    </td>
+                </tr>
+            </table>
+
+            <div class="office-bottom-address">
+                অফিসের ঠিকানা: {{ setting.office_address|default:"উপকর কমিশনার কার্যালয়, সার্কেল-১৩ (ফেনী সদর), নিজাম টাওয়ার (৩য় তলা), নোয়াখালী রোড, মহিপাল, ফেনী" }}
+            </div>
+        </div>
     </div>
 
 </body>
