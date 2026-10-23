@@ -1236,3 +1236,113 @@ def print_old_arrear_notice_view(request, taxpayer_id):
     }
     # বকেয়া নোটিশের জন্য পূর্বে তৈরি করা একই টেমপ্লেট ব্যবহার করা হলো
     return render(request, 'core/arrear_notice_print.html', context)
+
+
+@login_required(login_url='home')
+def it_11_cha_create_view(request):
+    """আই.টি-১১ছ (২০২৩) সার্টিফিকেট তৈরি বা ফর্ম ভিউ"""
+    if request.method == 'POST':
+        taxpayer_name = request.POST.get('taxpayer_name', '').strip()
+        circle = request.POST.get('circle', '').strip()
+        tin = request.POST.get('tin', '').strip()
+        assessment_year = request.POST.get('assessment_year', '').strip()
+        total_income = request.POST.get('total_income', '0.00').strip()
+        total_tax_paid = request.POST.get('total_tax_paid', '0.00').strip()
+        serial_no = request.POST.get('serial_no', '').strip()
+        volume_no = request.POST.get('volume_no', '').strip()
+        submission_date = request.POST.get('submission_date', str(date.today()))
+
+        # সেশনে ফর্মের সমস্ত ম্যানুয়াল ডাটা সংরক্ষণ করা হলো
+        request.session['it_11_cha_data'] = {
+            'taxpayer_name': taxpayer_name,
+            'circle': circle,
+            'tin': tin,
+            'assessment_year': assessment_year,
+            'total_income': total_income,
+            'total_tax_paid': total_tax_paid,
+            'serial_no': serial_no,
+            'volume_no': volume_no,
+            'submission_date': submission_date,
+        }
+
+        query_string = f"?ay={assessment_year}"
+        return redirect(f"/notices/it-11-cha/print/1/{query_string}")
+
+    return render(request, 'core/it_11_cha_form.html')
+
+
+@login_required(login_url='home')
+def it_11_cha_print_view(request, taxpayer_id):
+    """আই.টি-১১ছ প্রিন্ট ভিউ (ডেটাবেজ নির্ভরতা মুক্ত)"""
+    assessment_year = request.GET.get('ay', '')
+    cert_data = request.session.get('it_11_cha_data', {})
+
+    taxpayer_name = cert_data.get('taxpayer_name', 'অজ্ঞাত করদাতা')
+    circle = cert_data.get('circle', '')
+    tin_raw = cert_data.get('tin', '')
+
+    tin_bn = to_bengali_digits(tin_raw)
+    ay_bn = to_bengali_digits(assessment_year or cert_data.get('assessment_year', ''))
+    total_income_bn = to_bengali_digits(cert_data.get('total_income', '0.00'))
+    total_tax_paid_bn = to_bengali_digits(cert_data.get('total_tax_paid', '0.00'))
+    serial_no_bn = to_bengali_digits(cert_data.get('serial_no', ''))
+    volume_no_bn = to_bengali_digits(cert_data.get('volume_no', ''))
+
+    sub_date = cert_data.get('submission_date')
+    if sub_date:
+        try:
+            sub_dt_obj = datetime.strptime(sub_date, '%Y-%m-%d').date()
+            submission_date_bn = to_bengali_digits(sub_dt_obj.strftime('%d/%m/%Y')) + ' খ্রি.'
+        except ValueError:
+            submission_date_bn = to_bengali_digits(sub_date)
+    else:
+        submission_date_bn = to_bengali_digits(date.today().strftime('%d/%m/%Y')) + ' খ্রি.'
+
+    notice_setting = NoticeSetting.objects.filter(is_active=True).first()
+
+    context = {
+        'taxpayer_name': taxpayer_name,
+        'circle': circle,
+        'tin_bn': tin_bn,
+        'ay_bn': ay_bn,
+        'total_income_bn': total_income_bn,
+        'total_tax_paid_bn': total_tax_paid_bn,
+        'serial_no_bn': serial_no_bn,
+        'volume_no_bn': volume_no_bn,
+        'submission_date_bn': submission_date_bn,
+        'setting': notice_setting,
+    }
+    return render(request, 'core/it_11_cha_print.html', context)
+def generate_it11cha(request):
+    if request.method == 'POST':
+        # সরাসরি ইনপুট ফর্ম থেকে মান গ্রহণ
+        taxpayer_name = request.POST.get('taxpayer_name')
+        circle = request.POST.get('circle')
+        tin = request.POST.get('tin')
+        assessment_year = request.POST.get('assessment_year')
+        total_income = request.POST.get('total_income')
+        total_tax_paid = request.POST.get('total_tax_paid')
+        serial_no = request.POST.get('serial_no')
+        volume_no = request.POST.get('volume_no')
+        submission_date = request.POST.get('submission_date')
+
+        # প্রিন্ট টেমপ্লেটের কনটেক্সট সেটআপ
+        context = {
+            'taxpayer_name': taxpayer_name,  # ডেটাবেজের পরিবর্তে ফর্ম ইনপুট
+            'circle': circle,                # ডেটাবেজের পরিবর্তে ফর্ম ইনপুট
+            'tin_bn': convert_to_bn(tin),    # সংখ্যা বাংলায় রূপান্তর ফাংশন
+            'ay_bn': convert_to_bn(assessment_year),
+            'total_income_bn': convert_to_bn(total_income),
+            'total_tax_paid_bn': convert_to_bn(total_tax_paid),
+            'serial_no_bn': convert_to_bn(serial_no),
+            'volume_no_bn': convert_to_bn(volume_no),
+            'submission_date_bn': convert_to_bn(submission_date),
+        }
+
+        return render(request, 'core/it_11_cha_print.html', context)
+
+
+@login_required(login_url='home')
+def certificate_corner_view(request):
+    """সার্টিফিকেট তালিকা/কর্নার পেজ ভিউ"""
+    return render(request, 'core/certificate_corner.html')

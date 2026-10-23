@@ -60,5 +60,8 @@ urlpatterns = [
     path('registers/old-arrears/edit/<int:pk>/', views.edit_old_arrear_view, name='edit_old_arrear'),
     path('registers/old-arrears/delete/<int:pk>/', views.delete_old_arrear_view, name='delete_old_arrear'),
     path('notices/old-arrear/print/<int:taxpayer_id>/', views.print_old_arrear_notice_view, name='print_old_arrear_notice'),
+    path('notices/it-11-cha/create/', views.it_11_cha_create_view, name='it_11_cha_create'),
+    path('notices/it-11-cha/print/<int:taxpayer_id>/', views.it_11_cha_print_view, name='it_11_cha_print'),
+    path('certificates/', views.certificate_corner_view, name='certificate_corner'),
 
 ]
