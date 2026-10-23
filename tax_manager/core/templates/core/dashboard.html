@@ -106,18 +106,19 @@
                 </a>
                  রেজিস্টার -->
 
-                <div class="bg-white p-5 rounded-xl border-l-4 border-l-rose-500 border-slate-200 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="text-slate-500 text-xs font-semibold">মোট সংগৃহীত বকেয়া কর</div>
-                    <div class="mt-2 flex items-baseline justify-between">
-                        <span class="text-2xl font-bold text-rose-600">৳ {{ total_arrear_collected|floatformat:2 }}</span>
-                        <a href="{% url 'arrear_list' %}" class="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline bg-rose-50 border border-rose-200 px-2 py-1 rounded-md transition">
-                            সময়কাল অনুযায়ী তালিকা →
-                        </a>
-                    </div>
-                </div>
-                <p class="text-[11px] text-slate-400 mt-2">দাবি আদায় খাতা হতে</p>
-            </div>
+                 <!-- আপডেটেড বকেয়া রেজিস্টার কার্ড -->
+   <a href="{% url 'arrear_list' %}" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+       <div class="flex items-center justify-between">
+           <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 font-bold text-xl group-hover:bg-emerald-600 group-hover:text-white transition">
+               📊
+           </div>
+           <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">আপডেটেড</span>
+       </div>
+       <div class="mt-4">
+           <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition">আপডেটেড বকেয়া রেজিস্টার</h3>
+           <p class="text-xs text-slate-500 mt-0.5">Updated Arrear Register</p>
+       </div>
+   </a>
 
                 <!-- ৫. নোটিশ শাখা -->
 
@@ -134,6 +135,19 @@
               <a href="{% url 'taxpayer_list' %}" class="text-xs text-emerald-700 hover:underline font-medium">তালিকা ও অনুসন্ধান →</a>
             </div>
           </div>
+          <!-- পুরাতন / অপরীক্ষিত বকেয়া রেজিস্টার কার্ড -->
+          <a href="{% url 'old_arrear_list' %}" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+            <div class="flex items-center justify-between">
+                <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 font-bold text-xl group-hover:bg-amber-600 group-hover:text-white transition">
+                    📂
+                </div>
+                <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full">অপরীক্ষিত</span>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-base font-bold text-slate-800 group-hover:text-amber-600 transition">পুরাতন বকেয়া রেজিস্টার</h3>
+                <p class="text-xs text-slate-500 mt-0.5">অপরীক্ষিত বকেয়া এন্ট্রি ও যাচাইকরণ</p>
+            </div>
+          </a>
 
             <div class="bg-white p-5 rounded-xl border-l-4 border-l-teal-500 border-slate-200 shadow-sm">
                 <div class="text-slate-500 text-xs font-semibold">মোট সংগৃহীত অগ্রিম কর</div>
@@ -150,6 +164,7 @@
                 </div>
                 <p class="text-[11px] text-slate-400 mt-1">দাবি আদায় খাতা হতে</p>
             </div>
+
 
             <div class="bg-white p-5 rounded-xl border-l-4 border-l-amber-500 border-slate-200 shadow-sm">
                 <div class="text-slate-500 text-xs font-semibold">অপেক্ষমান নোটিশ সংখ্যা</div>

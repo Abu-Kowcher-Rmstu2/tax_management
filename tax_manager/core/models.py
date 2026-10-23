@@ -188,3 +188,44 @@ class AdvanceTaxRegister(models.Model):
 
     def __str__(self):
         return f"{self.taxpayer.name} ({self.taxpayer.tin}) - {self.get_installment_display()} - ৳{self.paid_amount}"
+
+
+class OldArrearRegister(models.Model):
+    """পুরাতন বা অপরীক্ষিত বকেয়া রেজিস্টার (মূল রেজিস্টার থেকে সম্পূর্ণ পৃথক)"""
+    ARREAR_TYPE_CHOICES = [
+        ('UNDISPUTED', 'অবিসংবাদিত (Undisputed)'),
+        ('DISPUTED', 'বিসংবাদিত (Disputed)'),
+    ]
+
+    taxpayer = models.ForeignKey(Taxpayer, on_delete=models.CASCADE, related_name="old_arrears", verbose_name="করদাতা")
+    assessment_year = models.CharField(max_length=9, verbose_name="করবর্ষ")
+
+    arrear_type = models.CharField(
+        max_length=15,
+        choices=ARREAR_TYPE_CHOICES,
+        default='UNDISPUTED',
+        verbose_name="বকেয়ার ধরন"
+    )
+    disposal_section = models.CharField(max_length=100, blank=True, null=True, verbose_name="নিষ্পত্তির ধারা")
+    disposal_date = models.DateField(null=True, blank=True, verbose_name="নিষ্পত্তির তারিখ")
+
+    demand = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="দাবি (Demand)")
+    fine = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="জরিমানা/সুদ (Fine)")
+    total_arrear = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="মোট বকেয়া দাবি")
+    collection = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="মোট আদায়")
+    due_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="অবশিষ্ট বকেয়া")
+
+    is_verified = models.BooleanField(default=False, verbose_name="যাচাইকৃত কিনা?")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "পুরাতন/অপরীক্ষিত বকেয়া রেজিস্টার"
+        verbose_name_plural = "পুরাতন/অপরীক্ষিত বকেয়া রেজিস্টারসমূহ"
+
+    def save(self, *args, **kwargs):
+        self.total_arrear = self.demand + self.fine
+        self.due_amount = self.total_arrear - self.collection
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"[অপরীক্ষিত] {self.taxpayer.tin} - {self.assessment_year} - ৳{self.due_amount}"

@@ -17,6 +17,7 @@ from .models import (
     ArrearRegister,
     NoticeSetting,
     AdvanceTaxRegister,
+    OldArrearRegister,  # এটি এখানে যুক্ত করুন
 )
 
 
@@ -1063,3 +1064,175 @@ def notice_179_print_view(request, taxpayer_id):
         'notice_data': notice_data,
     }
     return render(request, 'core/notice_179_print.html', context)
+    from .models import OldArrearRegister
+
+@login_required(login_url='home')
+def old_arrear_list_view(request):
+    """পুরাতন/অপরীক্ষিত বকেয়া রেজিস্টার তালিকা ও ফিল্টার"""
+    tin_query = request.GET.get('tin', '').strip()
+    year_query = request.GET.get('year', '').strip()
+
+    records = OldArrearRegister.objects.filter(is_verified=False).select_related('taxpayer').order_by('-created_at')
+
+    if tin_query:
+        records = records.filter(taxpayer__tin__icontains=tin_query)
+    if year_query:
+        records = records.filter(assessment_year__icontains=year_query)
+
+
+    total_demand = records.aggregate(total=Sum('total_arrear'))['total'] or Decimal('0.00')
+    total_due = records.aggregate(total=Sum('due_amount'))['total'] or Decimal('0.00')
+
+    context = {
+        'records': records,
+        'tin_query': tin_query,
+        'year_query': year_query,
+        'total_demand': total_demand,
+        'total_due': total_due,
+        'total_count': records.count(),
+    }
+    return render(request, 'core/old_arrear_list.html', context)
+
+
+@login_required(login_url='home')
+def add_old_arrear_view(request):
+    """পুরাতন/অপরীক্ষিত বকেয়া এন্ট্রি ফর্ম"""
+    if request.method == 'POST':
+        taxpayer_id = request.POST.get('taxpayer_id')
+        tin = request.POST.get('tin', '').strip()
+        assessment_year = request.POST.get('assessment_year', '').strip()
+        arrear_type = request.POST.get('arrear_type', 'UNDISPUTED')
+        disposal_section = request.POST.get('disposal_section', '').strip()
+        disposal_date = request.POST.get('disposal_date') or None
+
+        demand = Decimal(request.POST.get('demand') or '0.00')
+        fine = Decimal(request.POST.get('fine') or '0.00')
+        collection = Decimal(request.POST.get('collection') or '0.00')
+
+        taxpayer = None
+        if taxpayer_id:
+            taxpayer = Taxpayer.objects.filter(id=taxpayer_id).first()
+        if not taxpayer and tin:
+            taxpayer = Taxpayer.objects.filter(tin=tin).first()
+
+        if not taxpayer:
+            messages.error(request, f'টিআইএন "{tin}" দিয়ে কোনো করদাতা পাওয়া যায়নি!')
+            return redirect('add_old_arrear')
+
+        OldArrearRegister.objects.create(
+            taxpayer=taxpayer,
+            assessment_year=assessment_year,
+            arrear_type=arrear_type,
+            disposal_section=disposal_section,
+            disposal_date=disposal_date,
+            demand=demand,
+            fine=fine,
+            collection=collection,
+            is_verified=False
+        )
+
+        messages.success(request, f'করদাতা {taxpayer.name}-এর পুরাতন বকেয়া সফলভাবে সংরক্ষিত হয়েছে (অপরীক্ষিত তালিকায় রয়েছে)।')
+        return redirect('old_arrear_list')
+
+    return render(request, 'core/old_arrear_form.html')
+
+
+@login_required(login_url='home')
+def verify_and_move_arrear_view(request, pk):
+    """অপরীক্ষিত বকেয়া যাচাই করে মূল বকেয়া রেজিস্টারে স্থানান্তর করা"""
+    old_arrear = get_object_or_404(OldArrearRegister, pk=pk)
+
+    # মূল ArrearRegister এ আপডেট বা তৈরি করা
+    ArrearRegister.objects.update_or_create(
+        taxpayer=old_arrear.taxpayer,
+        assessment_year=old_arrear.assessment_year,
+        defaults={
+            'arrear_type': old_arrear.arrear_type,
+            'disposal_section': old_arrear.disposal_section,
+            'disposal_date': old_arrear.disposal_date,
+            'demand': old_arrear.demand,
+            'fine': old_arrear.fine,
+            'collection': old_arrear.collection,
+        }
+    )
+
+    # পুরাতন তালিকা থেকে স্ট্যাটাস ভেরিফাইড করা অথবা রেকর্ড মুছে ফেলা
+    old_arrear.is_verified = True
+    old_arrear.save()
+
+    messages.success(request, f'করদাতা {old_arrear.taxpayer.name}-এর করবর্ষ {old_arrear.assessment_year} এর বকেয়া সফলভাবে যাচাই করে মূল বকেয়া রেজিস্টারে যুক্ত করা হয়েছে!')
+    return redirect('old_arrear_list')
+
+@login_required(login_url='home')
+def edit_old_arrear_view(request, pk):
+    """পুরাতন/অপরীক্ষিত বকেয়া এডিট করার ভিউ"""
+    old_arrear = get_object_or_404(OldArrearRegister, pk=pk)
+
+    if request.method == 'POST':
+        old_arrear.assessment_year = request.POST.get('assessment_year', '').strip()
+        old_arrear.arrear_type = request.POST.get('arrear_type', 'UNDISPUTED')
+        old_arrear.disposal_section = request.POST.get('disposal_section', '').strip()
+        old_arrear.disposal_date = request.POST.get('disposal_date') or None
+        old_arrear.demand = Decimal(request.POST.get('demand') or '0.00')
+        old_arrear.fine = Decimal(request.POST.get('fine') or '0.00')
+        old_arrear.collection = Decimal(request.POST.get('collection') or '0.00')
+        old_arrear.save()
+
+        messages.success(request, f'করদাতা {old_arrear.taxpayer.name}-এর বকেয়া তথ্য সফলভাবে আপডেট করা হয়েছে।')
+        return redirect('old_arrear_list')
+
+    return render(request, 'core/old_arrear_edit.html', {'old_arrear': old_arrear})
+
+
+@login_required(login_url='home')
+def delete_old_arrear_view(request, pk):
+    """পুরাতন/অপরীক্ষিত বকেয়া রেকর্ড ডিলিট করার ভিউ"""
+    old_arrear = get_object_or_404(OldArrearRegister, pk=pk)
+    taxpayer_name = old_arrear.taxpayer.name
+    old_arrear.delete()
+
+    messages.success(request, f'করদাতা {taxpayer_name}-এর অপরীক্ষিত বকেয়া রেকর্ড সফলভাবে মুছে ফেলা হয়েছে।')
+    return redirect('old_arrear_list')
+
+
+@login_required(login_url='home')
+def print_old_arrear_notice_view(request, taxpayer_id):
+    """পুরাতন/অপরীক্ষিত বকেয়া রেজিস্টারের ডাটা দিয়ে বকেয়া নোটিশ প্রিন্ট ভিউ"""
+    taxpayer = get_object_or_404(Taxpayer, id=taxpayer_id)
+
+    # OldArrearRegister থেকে শুধু ঐ করদাতার অপরীক্ষিত বকেয়াগুলো ফিল্টার করা
+    arrear_records = OldArrearRegister.objects.filter(taxpayer=taxpayer, due_amount__gt=0, is_verified=False).order_by('assessment_year')
+
+    # যদি অপরীক্ষিত তালিকায় না থাকে, তবে মূল রেজিস্টার থেকে চেক করা যেতে পারে
+    if not arrear_records.exists():
+        arrear_records = ArrearRegister.objects.filter(taxpayer=taxpayer, due_amount__gt=0).order_by('assessment_year')
+
+    req_issue_date = request.GET.get('issue_date')
+    req_deadline_date = request.GET.get('deadline_date')
+
+    today = datetime.strptime(req_issue_date, '%Y-%m-%d').date() if req_issue_date else date.today()
+    deadline_date = datetime.strptime(req_deadline_date, '%Y-%m-%d').date() if req_deadline_date else (today + timedelta(days=15))
+
+    issue_date_bn = to_bengali_digits(today.strftime('%d/%m/%Y')) + ' খ্রি.'
+    deadline_date_bn = to_bengali_digits(deadline_date.strftime('%d/%m/%Y')) + ' খ্রি.'
+    file_no_bn = to_bengali_digits(taxpayer.tin)
+
+    total_demand = sum((r.demand for r in arrear_records), Decimal('0.00'))
+    total_fine = sum((r.fine for r in arrear_records), Decimal('0.00'))
+    grand_total = sum((r.due_amount for r in arrear_records), Decimal('0.00'))
+
+    notice_setting = NoticeSetting.objects.filter(is_active=True).first()
+
+    context = {
+        'taxpayer': taxpayer,
+        'arrear_records': arrear_records,
+        'file_no': file_no_bn,
+        'issue_date': issue_date_bn,
+        'deadline_date': deadline_date_bn,
+        'total_demand': total_demand,
+        'total_fine': total_fine,
+        'grand_total': grand_total,
+        'setting': notice_setting,
+    }
+    # বকেয়া নোটিশের জন্য পূর্বে তৈরি করা একই টেমপ্লেট ব্যবহার করা হলো
+    return render(request, 'core/arrear_notice_print.html', context)

@@ -54,5 +54,11 @@ urlpatterns = [
     path('notices/212/print/<int:taxpayer_id>/', views.notice_212_print_view, name='notice_212_print'),
     path('notices/179/create/', views.notice_179_create_view, name='notice_179_create'),
     path('notices/179/print/<int:taxpayer_id>/', views.notice_179_print_view, name='notice_179_print'),
+    path('registers/old-arrears/', views.old_arrear_list_view, name='old_arrear_list'),
+    path('registers/old-arrears/add/', views.add_old_arrear_view, name='add_old_arrear'),
+    path('registers/old-arrears/verify/<int:pk>/', views.verify_and_move_arrear_view, name='verify_and_move_arrear'),
+    path('registers/old-arrears/edit/<int:pk>/', views.edit_old_arrear_view, name='edit_old_arrear'),
+    path('registers/old-arrears/delete/<int:pk>/', views.delete_old_arrear_view, name='delete_old_arrear'),
+    path('notices/old-arrear/print/<int:taxpayer_id>/', views.print_old_arrear_notice_view, name='print_old_arrear_notice'),
 
 ]
